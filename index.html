@@ -119,6 +119,49 @@
             </div>
         </div>
         
+        <!-- Chat Screen - Initially hidden, will show only after connection -->
+        <div id="chat-screen" class="screen" style="display: none;">
+            <div class="chat-header">
+                <div class="chat-status">
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Connected with Stranger</span>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button class="btn icon-btn" id="new-topic-btn" title="Suggest New Topic">
+                        <i class="fas fa-lightbulb"></i>
+                    </button>
+                    <button id="end-chat" class="btn danger-btn">
+                        <span class="btn-icon"><i class="fas fa-door-open"></i></span>
+                        <span class="btn-text">End Chat</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chat-main">
+                <div id="chat-messages"></div>
+                <div id="typing-indicator">
+                    <div class="typing-bubble">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input-area">
+                <div class="input-container">
+                    <textarea id="message-input" placeholder="Type a message..." rows="1"></textarea>
+                </div>
+                <button id="send-message" class="btn send-btn" title="Send Message">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        
         <footer>
             <p>WhiBO © 2025 | <a href="#privacy" class="footer-link">Privacy</a> | <a href="#terms" class="footer-link">Terms</a></p>
         </footer>

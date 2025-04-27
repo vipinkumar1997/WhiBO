@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhiBO Admin - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div class="admin-container">
+        <div id="login-screen" class="admin-screen active">
+            <div class="login-form">
+                <h1><i class="fas fa-comments"></i> WhiBO</h1>
+                <h2>Admin Access</h2>
+                <form id="admin-login-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter password" required>
+                    </div>
+                    <div class="error-message" id="login-error"></div>
+                    <button type="submit" class="primary-btn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+                <div class="back-to-site">
+                    <a href="/">Back to WhiBO</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="dashboard-screen" class="admin-screen">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h2><i class="fas fa-comments"></i> WhiBO</h2>
+                </div>
+                <ul class="sidebar-menu">
+                    <li class="active" data-tab="overview">
+                        <i class="fas fa-tachometer-alt"></i> Overview
+                    </li>
+                    <li data-tab="active-users">
+                        <i class="fas fa-users"></i> Active Users
+                    </li>
+                    <li data-tab="chat-logs">
+                        <i class="fas fa-history"></i> Chat Logs
+                    </li>
+                    <li data-tab="settings">
+                        <i class="fas fa-cog"></i> Settings
+                    </li>
+                    <li id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </li>
+                </ul>
+            </div>
+            <div class="main-content">
+                <div class="top-bar">
+                    <h2 id="page-title">Dashboard Overview</h2>
+                    <span class="admin-name">Admin</span>
+                </div>
+
+                <div class="tab-content active" id="overview">
+                    <div class="stats-cards">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-users"></i></div>
+                            <div class="stat-details">
+                                <h3>Total Users</h3>
+                                <div class="stat-number" id="total-users">--</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-user-clock"></i></div>
+                            <div class="stat-details">
+                                <h3>Online Now</h3>
+                                <div class="stat-number" id="online-users">--</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-comments"></i></div>
+                            <div class="stat-details">
+                                <h3>Active Chats</h3>
+                                <div class="stat-number" id="active-chats">--</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-exchange-alt"></i></div>
+                            <div class="stat-details">
+                                <h3>Messages Today</h3>
+                                <div class="stat-number" id="messages-today">--</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>User Activity (Last 24 Hours)</h3>
+                        <div class="chart" id="activity-chart">
+                            <div class="chart-placeholder">
+                                <i class="fas fa-chart-line"></i>
+                                <p>Activity data will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="active-users">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Status</th>
+                                    <th>Connected Since</th>
+                                    <th>Chat Partner</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="active-users-table">
+                                <tr class="table-placeholder">
+                                    <td colspan="5">Loading user data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="chat-logs">
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="date-filter">Date:</label>
+                            <input type="date" id="date-filter" name="date-filter">
+                        </div>
+                        <button class="secondary-btn" id="apply-filters">
+                            <i class="fas fa-filter"></i> Apply Filters
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Chat ID</th>
+                                    <th>Users</th>
+                                    <th>Started</th>
+                                    <th>Duration</th>
+                                    <th>Messages</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="chat-logs-table">
+                                <tr class="table-placeholder">
+                                    <td colspan="6">Loading chat data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="settings">
+                    <div class="settings-container">
+                        <div class="settings-card">
+                            <h3>Admin Password</h3>
+                            <form id="change-password-form">
+                                <div class="form-group">
+                                    <label for="current-password">Current Password</label>
+                                    <input type="password" id="current-password" name="current-password" placeholder="Enter current password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new-password">New Password</label>
+                                    <input type="password" id="new-password" name="new-password" placeholder="Enter new password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirm-password">Confirm New Password</label>
+                                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm new password" required>
+                                </div>
+                                <div class="error-message" id="password-error"></div>
+                                <button type="submit" class="primary-btn">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <h3>System Settings</h3>
+                            <form id="system-settings-form">
+                                <div class="form-group">
+                                    <label for="max-waiting-time">Maximum Waiting Time (seconds)</label>
+                                    <input type="number" id="max-waiting-time" name="max-waiting-time" min="10" max="300" value="120">
+                                </div>
+                                <div class="form-group checkbox-group">
+                                    <input type="checkbox" id="enable-logs" name="enable-logs" checked>
+                                    <label for="enable-logs">Enable Chat Logging</label>
+                                </div>
+                                <div class="form-group checkbox-group">
+                                    <input type="checkbox" id="maintenance-mode" name="maintenance-mode">
+                                    <label for="maintenance-mode">Maintenance Mode</label>
+                                </div>
+                                <button type="submit" class="primary-btn">
+                                    <i class="fas fa-save"></i> Save Settings
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

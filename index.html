@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WhiBO - Anonymous Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta name="description" content="WhiBO - Chat with random strangers anonymously from around the world">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-comments"></i> WhiBO</h1>
+            <p class="subtitle">Connect with random people worldwide</p>
+        </header>
+        
+        <div id="welcome-screen" class="screen active">
+            <div class="welcome-content">
+                <h2>Anonymous Conversations</h2>
+                <p>Chat with random strangers without sharing personal information.</p>
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-user-secret"></i>
+                        <span>Anonymous</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-bolt"></i>
+                        <span>Fast</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-globe"></i>
+                        <span>Global</span>
+                    </div>
+                </div>
+                <button id="start-chat" class="primary-btn pulse-animation">
+                    <i class="fas fa-random"></i> Start Chatting
+                </button>
+            </div>
+        </div>
+        
+        <div id="waiting-screen" class="screen">
+            <div class="waiting-content">
+                <h2>Finding someone</h2>
+                <div class="pulse-loader"></div>
+                <p>Looking for an interesting conversation...</p>
+                <button id="cancel-search" class="secondary-btn">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+        
+        <div id="chat-screen" class="screen">
+            <div id="chat-header">
+                <div class="chat-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Chatting with a stranger</span>
+                </div>
+                <button id="end-chat" class="danger-btn">
+                    <i class="fas fa-sign-out-alt"></i> <span class="btn-text">End Chat</span>
+                </button>
+            </div>
+            <div id="chat-messages"></div>
+            <div id="typing-indicator">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span>Stranger is typing...</span>
+            </div>
+            <div id="chat-input">
+                <textarea id="message-input" placeholder="Type a message..."></textarea>
+                <button id="send-message">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 WhiBO | Chat responsibly</p>
+            <a href="/admin" class="admin-link"><i class="fas fa-cog"></i></a>
+        </footer>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

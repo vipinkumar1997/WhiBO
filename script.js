@@ -16,13 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const startChatBtn = document.getElementById('start-chat');
     const cancelSearchBtn = document.getElementById('cancel-search');
     const endChatBtn = document.getElementById('end-chat');
-    const messageInput = document.getElementById('message-input');
-    const sendMessageBtn = document.getElementById('send-message');
     const chatMessages = document.getElementById('chat-messages');
     const typingIndicator = document.getElementById('typing-indicator');
     const statusText = document.querySelector('.status-text');
     const newTopicBtn = document.getElementById('new-topic-btn');
-    const emojiBtn = document.getElementById('emoji-btn');
     const themeSwitch = document.getElementById('theme-switch');
     const progressBar = document.querySelector('.search-progress-bar');
     
@@ -185,11 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update on resize
     window.addEventListener('resize', () => {
         fixIOSViewportHeight();
-        
-        // Reset textarea height
-        if (messageInput) {
-            messageInput.style.height = 'auto';
-        }
     });
     
     // Add reconnection handling for Render.com
@@ -222,7 +214,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     socket.on('matched', () => {
         chatActive = true;
+        
+        // Make sure chat screen is visible when a match is found
+        if (chatScreen) {
+            chatScreen.style.display = 'flex';
+        }
         showScreen(chatScreen);
+        
         if (statusText) statusText.textContent = 'Connected with Stranger';
         
         // Update end chat button for mobile
@@ -237,11 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Clear previous messages if any
         if (chatMessages) chatMessages.innerHTML = '';
         addSystemMessage('You are now connected with a stranger');
-        
-        // Focus on input field
-        setTimeout(() => {
-            if (messageInput) messageInput.focus();
-        }, 300);
     });
     
     socket.on('chat message', (message) => {
@@ -342,96 +335,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    if (sendMessageBtn) {
-        sendMessageBtn.addEventListener('click', sendMessage);
-    }
-    
-    // Prevent textarea from capturing Enter key for form submission
-    if (messageInput) {
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-            
-            // Emit typing event
-            if (chatActive) {
-                socket.emit('typing');
-                
-                // Clear previous timeout
-                clearTimeout(typingTimeout);
-                typingTimeout = setTimeout(() => {
-                    socket.emit('stop typing');
-                }, 1000);
-            }
-        });
-        
-        // Auto-resize textarea as user types
-        messageInput.addEventListener('input', function() {
-            // Reset height to auto to correctly calculate new height
-            this.style.height = 'auto';
-            
-            // Set the new height based on scroll height (max 100px)
-            const newHeight = Math.min(this.scrollHeight, 100);
-            this.style.height = newHeight + 'px';
-        });
-    }
-    
-    function sendMessage() {
-        if (!messageInput) return;
-        
-        const message = messageInput.value.trim();
-        if (message && chatActive) {
-            socket.emit('chat message', message);
-            socket.emit('stop typing');
-            addMessage(message, true);
-            messageInput.value = '';
-            
-            // Reset textarea height
-            messageInput.style.height = 'auto';
-            
-            // Focus back on input
-            messageInput.focus();
-            
-            // Add send button animation
-            sendMessageBtn.classList.add('clicked');
-            setTimeout(() => {
-                sendMessageBtn.classList.remove('clicked');
-            }, 200);
-        }
-    }
-    
     // New Topic button functionality
     if (newTopicBtn) {
         newTopicBtn.addEventListener('click', () => {
-            if (chatActive && messageInput) {
+            if (chatActive) {
                 const randomTopic = chatTopics[Math.floor(Math.random() * chatTopics.length)];
-                messageInput.value = randomTopic;
-                messageInput.focus();
+                addSystemMessage(`Suggested topic: ${randomTopic}`);
                 
                 // Animate button
                 newTopicBtn.classList.add('clicked');
                 setTimeout(() => {
                     newTopicBtn.classList.remove('clicked');
-                }, 200);
-            }
-        });
-    }
-    
-    // Emoji button functionality
-    if (emojiBtn) {
-        emojiBtn.addEventListener('click', () => {
-            if (messageInput) {
-                // Simple emoji insertion for demo purposes
-                const emojis = ['😊', '👋', '👍', '❤️', '😂', '🙌', '🎉', '🤔', '😎', '🔥'];
-                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-                messageInput.value += randomEmoji;
-                messageInput.focus();
-                
-                // Animate button
-                emojiBtn.classList.add('clicked');
-                setTimeout(() => {
-                    emojiBtn.classList.remove('clicked');
                 }, 200);
             }
         });

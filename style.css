@@ -6,7 +6,7 @@
 }
 
 :root {
-    --primary-color: #4d8bf5; /* Updated brand color for WhiBO */
+    --primary-color: #4d8bf5;
     --primary-dark: #3470d8;
     --secondary-color: #f5f7ff;
     --danger-color: #ff4d6d;
@@ -15,8 +15,8 @@
     --light-text: #777;
     --border-color: #e1e5f2;
     --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    --message-self: linear-gradient(to right, #4776E6, #8E54E9);
-    --message-stranger: #f0f2f5;
+    --message-self: #e3f2fd;  /* Light blue for user messages */
+    --message-stranger: #f1f1f1; /* Light grey for stranger messages */
 }
 
 html {
@@ -37,7 +37,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 650px;
+    max-width: 900px;  /* Increased max width for better PC viewing */
     background-color: white;
     border-radius: 15px;
     box-shadow: var(--shadow);
@@ -283,8 +283,8 @@ button {
     position: relative;
     display: flex;
     flex-direction: column;
-    background-color: #f9faff;
-    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%234d8bf5' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 16c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm0-2c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zm33.414-6l5.95-5.95L45.95.636 40 6.586 34.05.636 32.636 2.05 38.586 8l-5.95 5.95 1.414 1.414L40 9.414l5.95 5.95 1.414-1.414L41.414 8zM40 48c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm0-2c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zM9.414 40l5.95-5.95-1.414-1.414L8 38.586l-5.95-5.95L.636 34.05 6.586 40l-5.95 5.95 1.414 1.414L8 41.414l5.95 5.95 1.414-1.414L9.414 40z' fill='%234d8bf5' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
 }
 
 #chat-messages {
@@ -293,9 +293,12 @@ button {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;  /* Increased gap between messages */
     scrollbar-width: thin;
     scrollbar-color: #d0d0d0 transparent;
+    margin: 0 auto;  /* Center messages */
+    width: 100%;     /* Full width by default */
+    max-width: 750px; /* Max width for larger screens */
 }
 
 #chat-messages::-webkit-scrollbar {
@@ -316,10 +319,10 @@ button {
     border-radius: 18px;
     max-width: 75%;
     position: relative;
-    line-height: 1.4;
+    line-height: 1.5;
     word-break: break-word;
     animation: fadeIn 0.3s ease-in-out;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
 .message.system {
@@ -329,7 +332,7 @@ button {
     font-size: 0.85rem;
     padding: 8px 15px;
     border-radius: 15px;
-    margin: 10px 0;
+    margin: 5px 0;
     max-width: 80%;
     box-shadow: none;
 }
@@ -337,43 +340,22 @@ button {
 .message.stranger {
     background-color: var(--message-stranger);
     align-self: flex-start;
-    border-bottom-left-radius: 5px;
-}
-
-.message.stranger::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: -6px;
-    width: 12px;
-    height: 12px;
-    background-color: var(--message-stranger);
-    border-radius: 0 0 12px 0;
-    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    border-top-left-radius: 4px;
+    color: var(--text-color);
+    margin-right: auto;
 }
 
 .message.self {
-    background: var(--message-self);
-    color: white;
+    background-color: var(--message-self);
+    color: var(--text-color);
     align-self: flex-end;
-    border-bottom-right-radius: 5px;
-}
-
-.message.self::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: -6px;
-    width: 12px;
-    height: 12px;
-    background: var(--primary-color);
-    border-radius: 0 0 0 12px;
-    clip-path: polygon(0 0, 0 100%, 100% 100%);
-    background: var(--primary-dark);
+    border-top-right-radius: 4px;
+    margin-left: auto;
+    border-bottom-right-radius: 18px;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
@@ -389,7 +371,6 @@ button {
     left: 20px;
     background-color: rgba(255,255,255,0.9);
     border-radius: 16px;
-    border-bottom-left-radius: 4px;
     margin-bottom: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     animation: fadeIn 0.3s ease-in-out;
@@ -431,6 +412,9 @@ button {
     position: relative;
     z-index: 10;
     align-items: center;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .emoji-btn {
@@ -446,6 +430,7 @@ button {
     border: none;
     cursor: pointer;
     transition: all 0.2s;
+    flex-shrink: 0;
 }
 
 .emoji-btn:hover {
@@ -589,6 +574,7 @@ footer {
     
     #chat-messages {
         padding: 15px;
+        width: 100%;
     }
     
     .message {
@@ -635,6 +621,27 @@ footer {
     
     .message {
         max-width: 90%;
+        padding: 10px 14px;
+    }
+    
+    #chat-input {
+        padding: 8px;
+    }
+    
+    .emoji-btn, #send-message {
+        width: 38px;
+        height: 38px;
+    }
+}
+
+/* Large screens - center the chat content */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 950px;
+    }
+    
+    #chat-messages {
+        max-width: 800px;
     }
 }
 

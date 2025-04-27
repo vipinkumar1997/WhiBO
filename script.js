@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Configure Socket.io with Render-optimized settings
+    // Socket.io connection with optimized settings
     const socket = io({
         reconnection: true,
         reconnectionAttempts: 5,
@@ -21,6 +21,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatMessages = document.getElementById('chat-messages');
     const typingIndicator = document.getElementById('typing-indicator');
     const statusText = document.querySelector('.status-text');
+    const newTopicBtn = document.getElementById('new-topic-btn');
+    const emojiBtn = document.getElementById('emoji-btn');
+    
+    // Chat topics for suggestions
+    const chatTopics = [
+        "What's your favorite hobby?",
+        "If you could travel anywhere, where would you go?",
+        "What's the best movie you've seen recently?",
+        "Do you have any pets?",
+        "What kind of music do you enjoy?",
+        "What's your dream job?",
+        "What's the most interesting fact you know?",
+        "If you could have any superpower, what would it be?",
+        "What's your favorite food?",
+        "What are you passionate about?"
+    ];
     
     // State variables
     let chatActive = false;
@@ -84,13 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function addSystemMessage(message) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', 'system');
-        messageElement.style.alignSelf = 'center';
-        messageElement.style.backgroundColor = '#f8f9fa';
-        messageElement.style.color = '#6c757d';
-        messageElement.style.padding = '8px 15px';
-        messageElement.style.borderRadius = '15px';
-        messageElement.style.fontSize = '0.85rem';
-        messageElement.style.margin = '10px 0';
         messageElement.textContent = message;
         chatMessages.appendChild(messageElement);
         
@@ -290,6 +299,28 @@ document.addEventListener('DOMContentLoaded', () => {
             // Focus back on input
             messageInput.focus();
         }
+    }
+    
+    // New Topic button functionality
+    if (newTopicBtn) {
+        newTopicBtn.addEventListener('click', () => {
+            if (chatActive) {
+                const randomTopic = chatTopics[Math.floor(Math.random() * chatTopics.length)];
+                messageInput.value = randomTopic;
+                messageInput.focus();
+            }
+        });
+    }
+    
+    // Emoji button (placeholder functionality)
+    if (emojiBtn) {
+        emojiBtn.addEventListener('click', () => {
+            // Simple emoji insertion for demo purposes
+            const emojis = ['😊', '👋', '👍', '❤️', '😂', '🙌', '🎉', '🤔', '😎', '🔥'];
+            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+            messageInput.value += randomEmoji;
+            messageInput.focus();
+        });
     }
     
     // Handle mobile keyboard adjustments

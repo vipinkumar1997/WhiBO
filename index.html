@@ -5,94 +5,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WhiBO - Anonymous Chat</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <meta name="description" content="WhiBO - Chat with random strangers anonymously from around the world">
 </head>
 <body>
-    <div class="container">
+    <!-- Theme toggle switch -->
+    <div class="theme-toggle">
+        <input type="checkbox" id="theme-switch">
+        <label for="theme-switch" title="Toggle dark/light mode">
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
+            <span class="toggle-ball"></span>
+        </label>
+    </div>
+
+    <!-- Background elements -->
+    <div class="bg-elements">
+        <div class="bg-circle circle-1"></div>
+        <div class="bg-circle circle-2"></div>
+        <div class="bg-circle circle-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- App Header -->
         <header>
-            <h1><i class="fas fa-comments"></i> WhiBO</h1>
-            <p class="subtitle">Connect with random people worldwide</p>
+            <div class="brand">
+                <div class="logo">
+                    <div class="logo-inner">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                </div>
+                <div class="brand-text">
+                    <h1>WhiBO</h1>
+                    <div class="tagline">Anonymous Chat</div>
+                </div>
+            </div>
         </header>
         
+        <!-- Welcome Screen -->
         <div id="welcome-screen" class="screen active">
             <div class="welcome-content">
-                <h2>Anonymous Conversations</h2>
-                <p>Chat with random strangers without sharing personal information.</p>
-                <div class="features">
+                <div class="hero">
+                    <div class="hero-illustration">
+                        <div class="chat-bubble-animation">
+                            <div class="chat-bubble b1"><i class="fas fa-smile"></i></div>
+                            <div class="chat-bubble b2"><i class="fas fa-globe"></i></div>
+                            <div class="chat-bubble b3"><i class="fas fa-lock"></i></div>
+                        </div>
+                    </div>
+                    <h2>Talk to <span class="highlight">Strangers</span></h2>
+                    <p class="hero-text">Connect instantly with random people from around the world. Anonymous, secure, and free.</p>
+                </div>
+                
+                <div class="features-grid">
                     <div class="feature">
-                        <i class="fas fa-user-secret"></i>
-                        <span>Anonymous</span>
+                        <div class="feature-icon">
+                            <i class="fas fa-mask"></i>
+                        </div>
+                        <h3>Anonymous</h3>
+                        <p>Chat without revealing your identity</p>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-bolt"></i>
-                        <span>Fast</span>
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3>Instant</h3>
+                        <p>Connect with someone in seconds</p>
                     </div>
                     <div class="feature">
-                        <i class="fas fa-globe"></i>
-                        <span>Global</span>
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Secure</h3>
+                        <p>Your conversations stay private</p>
                     </div>
                 </div>
-                <button id="start-chat" class="primary-btn pulse-animation">
-                    <i class="fas fa-random"></i> Start Chatting
-                </button>
+                
+                <div class="start-section">
+                    <button id="start-chat" class="btn primary-btn pulse">
+                        <span class="btn-icon"><i class="fas fa-comment-dots"></i></span>
+                        <span class="btn-text">Start Chatting Now</span>
+                    </button>
+                </div>
             </div>
         </div>
         
+        <!-- Waiting Screen -->
         <div id="waiting-screen" class="screen">
             <div class="waiting-content">
-                <h2>Finding someone</h2>
-                <div class="pulse-loader"></div>
-                <p>Looking for an interesting conversation...</p>
-                <button id="cancel-search" class="secondary-btn">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-            </div>
-        </div>
-        
-        <div id="chat-screen" class="screen">
-            <div id="chat-header">
-                <div class="chat-status">
-                    <span class="status-dot"></span>
-                    <span class="status-text">Chatting with a stranger</span>
-                </div>
-                <div class="chat-actions">
-                    <button class="action-btn" id="new-topic-btn" title="Suggest New Topic">
-                        <i class="fas fa-lightbulb"></i>
-                    </button>
-                    <button id="end-chat" class="danger-btn">
-                        <i class="fas fa-sign-out-alt"></i> <span class="btn-text">End Chat</span>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="chat-container">
-                <div id="chat-messages"></div>
-                <div id="typing-indicator">
-                    <div class="typing-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+                <div class="searching-animation">
+                    <div class="radar">
+                        <div class="radar-beam"></div>
+                        <div class="ping ping1"></div>
+                        <div class="ping ping2"></div>
+                        <div class="ping ping3"></div>
                     </div>
-                    <span>Stranger is typing...</span>
                 </div>
-            </div>
-            
-            <div id="chat-input">
-                <button class="emoji-btn" id="emoji-btn">
-                    <i class="far fa-smile"></i>
-                </button>
-                <textarea id="message-input" placeholder="Type a message..."></textarea>
-                <button id="send-message">
-                    <i class="fas fa-paper-plane"></i>
+                <h2>Finding Someone <span class="dots-loading"><span>.</span><span>.</span><span>.</span></span></h2>
+                <p>Searching for an interesting conversation partner</p>
+                <div class="search-status">
+                    <div class="search-progress-container">
+                        <div class="search-progress-bar"></div>
+                    </div>
+                </div>
+                <button id="cancel-search" class="btn secondary-btn">
+                    <span class="btn-icon"><i class="fas fa-times"></i></span>
+                    <span class="btn-text">Cancel</span>
                 </button>
             </div>
         </div>
         
         <footer>
-            <p>© 2023 WhiBO | Chat responsibly</p>
-            <a href="/admin" class="admin-link"><i class="fas fa-cog"></i></a>
+            <p>WhiBO © 2025 | <a href="#privacy" class="footer-link">Privacy</a> | <a href="#terms" class="footer-link">Terms</a></p>
         </footer>
     </div>
     <script src="/socket.io/socket.io.js"></script>

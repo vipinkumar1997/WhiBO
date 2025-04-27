@@ -117,9 +117,10 @@ body {
     padding: 0;
     margin: 0;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    width: 100%;
 }
 
 /* Mobile Keyboard Handling */
@@ -334,7 +335,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 3000;
     animation: fadeIn 0.3s ease;
 }
 
@@ -513,17 +514,83 @@ header {
     background-color: var(--bg);
 }
 
-/* Message styling with nicknames */
+/* Message styling improvements */
+.message {
+    max-width: 75%;
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    position: relative;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    word-wrap: break-word;
+    box-shadow: var(--bubble-shadow);
+    animation: messageAppear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin-bottom: 24px; /* Ensure space for timestamp below */
+}
+
+.message::after {
+    content: attr(data-time);
+    position: absolute;
+    bottom: -18px;
+    font-size: 0.75rem;
+    color: var(--msg-time);
+    white-space: nowrap;
+    opacity: 0.8;
+}
+
+.message.self {
+    align-self: flex-end;
+    background: var(--msg-self);
+    color: var(--msg-self-text);
+    border-bottom-right-radius: 4px;
+}
+
+.message.self::after {
+    right: 8px;
+}
+
+.message.stranger {
+    align-self: flex-start;
+    background: var(--msg-other);
+    color: var(--msg-other-text);
+    border-bottom-left-radius: 4px;
+}
+
+.message.stranger::after {
+    left: 8px;
+}
+
+/* Fix for system messages */
+.message.system {
+    align-self: center;
+    background: var(--msg-system);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    max-width: 90%;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+    margin-bottom: 15px; /* Less space for system messages */
+    text-align: center;
+}
+
+.message.system::after {
+    content: none; /* No timestamp for system messages */
+}
+
+/* Fix message nickname display */
 .message-content {
     display: flex;
     flex-direction: column;
     gap: 3px;
+    position: relative;
 }
 
 .message-nickname {
     font-size: 0.8rem;
     font-weight: 600;
     opacity: 0.8;
+    padding-bottom: 3px;
 }
 
 .message.self .message-nickname {
@@ -534,14 +601,11 @@ header {
     color: var(--primary);
 }
 
-.message-text {
-    word-break: break-word;
-}
-
+/* Fix translation button positioning */
 .translate-btn {
     position: absolute;
-    bottom: 5px;
-    right: 5px;
+    bottom: -2px;
+    right: -4px;
     background: transparent;
     border: none;
     color: var(--text-muted);
@@ -550,24 +614,22 @@ header {
     cursor: pointer;
     opacity: 0.6;
     transition: opacity 0.2s;
+    z-index: 5;
 }
 
-.translate-btn:hover {
-    opacity: 1;
-}
-
-.original-message {
-    margin-bottom: 5px;
-}
-
-.translated-message {
-    font-style: italic;
-    padding: 5px 8px;
-    background-color: rgba(0, 0, 0, 0.05);
-    border-radius: var(--radius-sm);
-    font-size: 0.9em;
-    color: var(--primary);
-    margin-top: 5px;
+/* Fix dialog overlay z-index */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    animation: fadeIn 0.3s ease;
 }
 
 /* Connection Status */
@@ -920,4 +982,231 @@ header {
     .waiting-content h2 {
         font-size: 1.4rem;
     }
+}
+
+/* Ensure content is centered */
+.welcome-content, .waiting-content {
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    text-align: center;
+}
+
+/* Fix hero section centering */
+.hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Fix features grid */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Fix animation display issues */
+.hero-illustration {
+    width: 100%;
+    height: 150px;
+    position: relative;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-bubble-animation {
+    position: relative;
+    width: 200px;
+    height: 150px;
+    margin: 0 auto;
+}
+
+/* Fix animation visibility */
+.chat-bubble {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: both;
+}
+
+.b1 {
+    left: 0;
+    top: 20px;
+    background-color: var(--primary);
+    animation-name: float-left;
+}
+
+.b2 {
+    left: 70px;
+    top: 0;
+    background-color: var(--accent);
+    animation-name: float-top;
+}
+
+.b3 {
+    right: 0;
+    top: 20px;
+    background-color: var(--secondary);
+    animation-name: float-right;
+}
+
+@keyframes float-left {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(15px);
+    }
+}
+
+@keyframes float-top {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+@keyframes float-right {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(15px);
+    }
+}
+
+/* Fix radar animation on waiting screen */
+.searching-animation {
+    width: 100%;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.radar {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    background-color: rgba(114, 105, 239, 0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.radar-beam {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.radar-beam::after {
+    content: '';
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(114, 105, 239, 0) 0%, rgba(114, 105, 239, 0.3) 100%);
+    animation: radar-beam 3s infinite linear;
+    transform-origin: right center;
+}
+
+@keyframes radar-beam {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.ping {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.ping1 {
+    top: 30%;
+    left: 20%;
+    animation: ping 3s infinite 0.5s ease-out;
+}
+
+.ping2 {
+    top: 60%;
+    right: 30%;
+    animation: ping 3s infinite 1.5s ease-out;
+}
+
+.ping3 {
+    bottom: 25%;
+    left: 40%;
+    animation: ping 3s infinite 2.5s ease-out;
+}
+
+@keyframes ping {
+    0% {
+        transform: scale(0.1);
+        opacity: 0;
+    }
+    20% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    70% {
+        transform: scale(1.8);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Ensure screen display is correct */
+.screen {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.screen.active {
+    display: flex;
 }

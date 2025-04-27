@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Terms of Service - WhiBO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,51 +10,54 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta name="description" content="Terms of Service for WhiBO - Anonymous Chat Platform">
     <style>
-        .policy-container {
+        .terms-container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 2rem;
-            line-height: 1.6;
-            color: var(--text-color);
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            text-align: left;
         }
         
-        .policy-header {
-            text-align: center;
-            margin-bottom: 2rem;
+        .terms-container h2 {
+            color: var(--primary);
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-weight: 600;
         }
         
-        .policy-section {
-            margin-bottom: 2rem;
+        .terms-container p {
+            margin-bottom: 20px;
+            color: var(--text);
+            line-height: 1.7;
         }
         
-        .policy-section h2 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
+        .terms-container ul {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+        
+        .terms-container li {
+            margin-bottom: 10px;
+            color: var(--text);
+            line-height: 1.7;
         }
         
         .back-btn {
+            margin-top: 30px;
             display: inline-flex;
             align-items: center;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-            font-weight: 500;
-            text-decoration: none;
-            transition: color 0.3s;
+            gap: 8px;
         }
         
-        .back-btn:hover {
-            color: var(--primary-color-dark);
-        }
-        
-        .back-btn i {
-            margin-right: 0.5rem;
-        }
-        
-        @media (max-width: 768px) {
-            .policy-container {
-                padding: 1.5rem;
-            }
+        .last-updated {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 30px;
+            font-style: italic;
         }
     </style>
 </head>
@@ -69,6 +72,13 @@
         </label>
     </div>
 
+    <!-- Background elements -->
+    <div class="bg-elements">
+        <div class="bg-circle circle-1"></div>
+        <div class="bg-circle circle-2"></div>
+        <div class="bg-circle circle-3"></div>
+    </div>
+
     <div class="app-container">
         <!-- App Header -->
         <header>
@@ -80,89 +90,67 @@
                 </div>
                 <div class="brand-text">
                     <h1>WhiBO</h1>
-                    <div class="tagline">Anonymous Chat</div>
+                    <div class="tagline">Terms of Service</div>
                 </div>
             </div>
         </header>
         
-        <div class="policy-container">
-            <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Home</a>
-            
-            <div class="policy-header">
-                <h1>Terms of Service</h1>
-                <p>Last Updated: April 27, 2025</p>
-            </div>
-            
-            <div class="policy-section">
+        <!-- Terms Content -->
+        <div class="screen active">
+            <div class="terms-container">
+                <h2>Terms of Service</h2>
+                <p>Welcome to WhiBO, an anonymous chat platform. By accessing or using our service, you agree to be bound by these Terms of Service ("Terms"). Please read them carefully.</p>
+                
                 <h2>1. Acceptance of Terms</h2>
-                <p>Welcome to WhiBO. By accessing or using our service, you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of the terms, you do not have permission to access the service.</p>
-            </div>
-            
-            <div class="policy-section">
+                <p>By accessing or using the WhiBO service, you agree to be bound by these Terms. If you do not agree to all the Terms, please do not access or use our services.</p>
+                
                 <h2>2. Description of Service</h2>
-                <p>WhiBO provides an anonymous chat platform that connects users randomly for text-based conversations. Our service is designed to be used as-is and we reserve the right to modify or discontinue, temporarily or permanently, the service with or without notice.</p>
-            </div>
-            
-            <div class="policy-section">
+                <p>WhiBO provides an anonymous chat platform that allows users to communicate with random strangers. We do not guarantee that the service will be uninterrupted, secure, or error-free.</p>
+                
                 <h2>3. User Conduct</h2>
-                <p>When using WhiBO, you agree to:</p>
+                <p>You agree not to use WhiBO for any illegal purposes or to conduct any illegal activities. This includes, but is not limited to:</p>
                 <ul>
-                    <li>Comply with all applicable laws and regulations</li>
-                    <li>Not engage in any harassing, abusive, or harmful behavior toward other users</li>
-                    <li>Not distribute spam, malware, or other malicious content</li>
-                    <li>Not impersonate others or misrepresent your identity</li>
-                    <li>Not use the service to transmit illegal, obscene, threatening, or harmful material</li>
-                    <li>Not attempt to disrupt or interfere with the service's security or functionality</li>
+                    <li>Harassment or bullying of other users</li>
+                    <li>Sharing illegal content</li>
+                    <li>Impersonating others</li>
+                    <li>Distributing malware or engaging in phishing activities</li>
+                    <li>Soliciting personal information from minors</li>
+                    <li>Sending spam or unsolicited messages</li>
                 </ul>
-                <p>We reserve the right to terminate or restrict your access to our service for violation of these Terms or for any other reason at our sole discretion.</p>
-            </div>
-            
-            <div class="policy-section">
-                <h2>4. Age Restrictions</h2>
-                <p>WhiBO is intended for users who are 13 years of age or older. By using our service, you confirm that you are at least 13 years old. If you are between 13 and 18 years old, you confirm that you have permission from a parent or guardian to use the service.</p>
-            </div>
-            
-            <div class="policy-section">
-                <h2>5. Privacy</h2>
-                <p>Your privacy is important to us. Please refer to our <a href="privacy.html">Privacy Policy</a> for information about how we collect, use, and disclose information about you.</p>
-            </div>
-            
-            <div class="policy-section">
-                <h2>6. User Content</h2>
-                <p>You are solely responsible for the content of your communications while using WhiBO. You agree that WhiBO has no responsibility or liability for the deletion or failure to store any content.</p>
-                <p>While we do not actively monitor chats, we reserve the right to review content that is reported to violate our Terms and to remove any content that we determine, in our sole discretion, violates these Terms or is otherwise harmful.</p>
-            </div>
-            
-            <div class="policy-section">
-                <h2>7. Intellectual Property</h2>
-                <p>The WhiBO service, including all content, features, and functionality, is owned by us and is protected by copyright, trademark, and other intellectual property laws. You may not copy, modify, distribute, sell, or lease any part of our service without our prior written consent.</p>
-            </div>
-            
-            <div class="policy-section">
+                
+                <h2>4. User Privacy</h2>
+                <p>While WhiBO is designed to be anonymous, users should be aware that no internet service is completely secure. Please refer to our <a href="privacy.html">Privacy Policy</a> for information on how we handle user data.</p>
+                
+                <h2>5. Age Restrictions</h2>
+                <p>You must be at least 18 years old to use WhiBO. By using this service, you represent and warrant that you are at least 18 years of age.</p>
+                
+                <h2>6. Content Ownership</h2>
+                <p>WhiBO does not claim ownership of the content that users share during their chats. However, by using our service, you grant WhiBO the right to transmit your content as necessary to provide our services.</p>
+                
+                <h2>7. Termination</h2>
+                <p>WhiBO reserves the right to terminate or suspend your access to our services immediately, without prior notice or liability, for any reason, including breach of these Terms.</p>
+                
                 <h2>8. Disclaimer of Warranties</h2>
-                <p>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.</p>
-                <p>We do not warrant that the service will be uninterrupted or error-free, that defects will be corrected, or that the service or the servers that make it available are free of viruses or other harmful components.</p>
-            </div>
-            
-            <div class="policy-section">
+                <p>WhiBO is provided on an "as is" and "as available" basis. We make no warranties, expressed or implied, regarding the reliability, accuracy, timeliness, or security of the service.</p>
+                
                 <h2>9. Limitation of Liability</h2>
-                <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, WHIBO AND ITS AFFILIATES, OFFICERS, EMPLOYEES, AGENTS, PARTNERS, AND LICENSORS WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF PROFITS, DATA, USE, OR GOODWILL, ARISING OUT OF OR IN CONNECTION WITH THESE TERMS OR THE USE OR INABILITY TO USE THE SERVICE.</p>
-            </div>
-            
-            <div class="policy-section">
+                <p>In no event shall WhiBO, its operators, directors, employees, or agents be liable for any indirect, incidental, special, consequential or punitive damages arising out of or related to your use of our services.</p>
+                
                 <h2>10. Changes to Terms</h2>
-                <p>We may revise these Terms at any time by updating this page. It is your responsibility to check this page periodically for changes. Your continued use of the service following the posting of revised Terms means that you accept and agree to the changes.</p>
-            </div>
-            
-            <div class="policy-section">
+                <p>WhiBO reserves the right to modify or replace these Terms at any time. It is your responsibility to check the Terms periodically for changes.</p>
+                
                 <h2>11. Governing Law</h2>
-                <p>These Terms shall be governed by and construed in accordance with the laws of [Jurisdiction], without regard to its conflict of law provisions.</p>
-            </div>
-            
-            <div class="policy-section">
-                <h2>12. Contact Us</h2>
-                <p>If you have any questions about these Terms, please contact us:</p>
-                <p>Email: terms@whibo.com</p>
+                <p>These Terms shall be governed by the laws of the jurisdiction in which WhiBO operates, without regard to its conflict of law provisions.</p>
+                
+                <h2>12. Contact Information</h2>
+                <p>If you have any questions about these Terms, please contact us at support@whibo.com.</p>
+                
+                <p class="last-updated">Last Updated: April 27, 2025</p>
+                
+                <a href="index.html" class="btn secondary-btn back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    <span class="btn-text">Back to Chat</span>
+                </a>
             </div>
         </div>
         
@@ -170,38 +158,30 @@
             <p>WhiBO © 2025 | <a href="privacy.html" class="footer-link">Privacy</a> | <a href="terms.html" class="footer-link">Terms</a></p>
         </footer>
     </div>
-    
+    <script src="script.js"></script>
     <script>
         // Theme toggle functionality
-        document.addEventListener('DOMContentLoaded', () => {
-            const themeSwitch = document.getElementById('theme-switch');
-            
-            // Initialize theme from local storage
-            function initTheme() {
-                const savedTheme = localStorage.getItem('theme');
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                
-                if (savedTheme === 'dark' || (savedTheme === null && prefersDark)) {
-                    document.body.classList.add('dark-theme');
-                    if (themeSwitch) themeSwitch.checked = true;
-                }
+        const themeSwitch = document.getElementById('theme-switch');
+        
+        // Check for saved theme preference or use device preference
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Apply theme based on saved preference or device preference
+        if (savedTheme === 'dark' || (savedTheme === null && prefersDark)) {
+            document.body.classList.add('dark-theme');
+            themeSwitch.checked = true;
+        }
+        
+        // Theme switch event listener
+        themeSwitch.addEventListener('change', () => {
+            if (themeSwitch.checked) {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('theme', 'light');
             }
-            
-            // Theme toggle event
-            if (themeSwitch) {
-                themeSwitch.addEventListener('change', () => {
-                    if (themeSwitch.checked) {
-                        document.body.classList.add('dark-theme');
-                        localStorage.setItem('theme', 'dark');
-                    } else {
-                        document.body.classList.remove('dark-theme');
-                        localStorage.setItem('theme', 'light');
-                    }
-                });
-            }
-            
-            // Initialize theme on load
-            initTheme();
         });
     </script>
 </body>

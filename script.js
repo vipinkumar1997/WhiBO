@@ -58,22 +58,29 @@ document.addEventListener('DOMContentLoaded', () => {
             fontSize: 'medium'
         };
         
-        const savedSettings = localStorage.getItem('whibo-settings');
-        return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+        try {
+            const savedSettings = localStorage.getItem('whibo-settings');
+            return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+        } catch (e) {
+            console.error('Error loading settings:', e);
+            return defaultSettings;
+        }
     }
     
     // Save user settings to localStorage
     function saveUserSettings() {
-        localStorage.setItem('whibo-settings', JSON.stringify(userSettings));
-        applyUserSettings();
+        try {
+            localStorage.setItem('whibo-settings', JSON.stringify(userSettings));
+            applyUserSettings();
+        } catch (e) {
+            console.error('Error saving settings:', e);
+        }
     }
     
     // Apply settings to the UI
     function applyUserSettings() {
         // Apply font size
         document.documentElement.setAttribute('data-font-size', userSettings.fontSize);
-        
-        // Other settings will be used when needed
     }
     
     // Generate a random nickname
@@ -88,6 +95,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${randomAdjective}${randomNoun}${randomNumber}`;
     }
     
+    // Helper function to show a screen
+    function showScreen(screen) {
+        // Hide all screens
+        welcomeScreen.classList.remove('active');
+        waitingScreen.classList.remove('active');
+        if (chatScreen) chatScreen.classList.remove('active');
+        
+        // Show the requested screen
+        if (screen) {
+            screen.classList.add('active');
+            if (screen === chatScreen) {
+                chatScreen.style.display = 'flex';
+            }
+        }
+    }
+    
     // Initialize nickname
     function setupNickname() {
         // Save nickname in localStorage
@@ -95,32 +118,38 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Add nickname to welcome screen
         const welcomeContent = document.querySelector('.welcome-content');
-        if (welcomeContent) {
-            const nicknameSection = document.createElement('div');
-            nicknameSection.className = 'nickname-section';
-            nicknameSection.innerHTML = `
-                <div class="nickname-display">
-                    <span>Your nickname:</span>
-                    <span class="nickname-value">${userNickname}</span>
-                    <button class="edit-nickname-btn" title="Change nickname">
-                        <i class="fas fa-pencil-alt"></i>
-                    </button>
-                </div>
-            `;
-            
-            // Insert before the start-section
-            const startSection = welcomeContent.querySelector('.start-section');
-            if (startSection) {
-                welcomeContent.insertBefore(nicknameSection, startSection);
-            } else {
-                welcomeContent.appendChild(nicknameSection);
-            }
-            
-            // Add event listener for nickname edit
-            const editBtn = nicknameSection.querySelector('.edit-nickname-btn');
-            if (editBtn) {
-                editBtn.addEventListener('click', showNicknameDialog);
-            }
+        if (!welcomeContent) return;
+        
+        // Remove existing nickname section if any
+        const existingNickname = welcomeContent.querySelector('.nickname-section');
+        if (existingNickname) {
+            existingNickname.remove();
+        }
+        
+        const nicknameSection = document.createElement('div');
+        nicknameSection.className = 'nickname-section';
+        nicknameSection.innerHTML = `
+            <div class="nickname-display">
+                <span>Your nickname:</span>
+                <span class="nickname-value">${userNickname}</span>
+                <button class="edit-nickname-btn" title="Change nickname">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+            </div>
+        `;
+        
+        // Insert before the start-section
+        const startSection = welcomeContent.querySelector('.start-section');
+        if (startSection) {
+            welcomeContent.insertBefore(nicknameSection, startSection);
+        } else {
+            welcomeContent.appendChild(nicknameSection);
+        }
+        
+        // Add event listener for nickname edit
+        const editBtn = nicknameSection.querySelector('.edit-nickname-btn');
+        if (editBtn) {
+            editBtn.addEventListener('click', showNicknameDialog);
         }
     }
     
@@ -151,8 +180,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Focus on input
         const nicknameInput = document.getElementById('nickname-input');
         if (nicknameInput) {
-            nicknameInput.focus();
-            nicknameInput.select();
+            setTimeout(() => {
+                nicknameInput.focus();
+                nicknameInput.select();
+            }, 100);
         }
         
         // Generate random nickname
@@ -182,21 +213,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 overlay.remove();
             }
         });
+
+        // Handle Enter key press
+        nicknameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('save-nickname').click();
+            }
+        });
     }
     
     // Add settings menu to the header
     function setupSettingsMenu() {
         const header = document.querySelector('header .brand');
-        if (header) {
-            const settingsButton = document.createElement('button');
-            settingsButton.className = 'settings-btn';
-            settingsButton.title = 'Settings';
-            settingsButton.innerHTML = '<i class="fas fa-cog"></i>';
-            header.appendChild(settingsButton);
-            
-            // Add click event listener
-            settingsButton.addEventListener('click', showSettingsDialog);
+        if (!header) return;
+        
+        // Remove existing settings button if any
+        const existingBtn = document.querySelector('.settings-btn');
+        if (existingBtn) {
+            existingBtn.remove();
         }
+        
+        const settingsButton = document.createElement('button');
+        settingsButton.className = 'settings-btn';
+        settingsButton.title = 'Settings';
+        settingsButton.innerHTML = '<i class="fas fa-cog"></i>';
+        header.appendChild(settingsButton);
+        
+        // Add click event listener
+        settingsButton.addEventListener('click', showSettingsDialog);
     }
     
     // Show settings dialog
@@ -259,23 +303,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to add report button to chat header
     function setupReportSystem() {
         const chatActions = document.querySelector('.chat-actions');
-        if (chatActions) {
-            const reportButton = document.createElement('button');
-            reportButton.className = 'btn icon-btn report-btn';
-            reportButton.title = 'Report user';
-            reportButton.innerHTML = '<i class="fas fa-flag"></i>';
-            
-            // Insert before the end chat button
-            const endChatBtn = document.getElementById('end-chat');
-            if (endChatBtn) {
-                chatActions.insertBefore(reportButton, endChatBtn);
-            } else {
-                chatActions.appendChild(reportButton);
-            }
-            
-            // Add click event
-            reportButton.addEventListener('click', showReportDialog);
+        if (!chatActions) return;
+        
+        // Remove existing report button if any
+        const existingBtn = chatActions.querySelector('.report-btn');
+        if (existingBtn) {
+            existingBtn.remove();
         }
+        
+        const reportButton = document.createElement('button');
+        reportButton.className = 'btn icon-btn report-btn';
+        reportButton.title = 'Report user';
+        reportButton.innerHTML = '<i class="fas fa-flag"></i>';
+        
+        // Insert before the end chat button
+        const endChatBtn = document.getElementById('end-chat');
+        if (endChatBtn) {
+            chatActions.insertBefore(reportButton, endChatBtn);
+        } else {
+            chatActions.appendChild(reportButton);
+        }
+        
+        // Add click event
+        reportButton.addEventListener('click', showReportDialog);
     }
     
     // Show report dialog
@@ -377,157 +427,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
     
-    // Initialize report system
-    function initializeReportSystem() {
-        setupReportSystem();
-        
-        // Add handler for report response from server
-        socket.on('report response', (data) => {
-            if (data.status === 'success') {
-                addSystemMessage('Your report has been submitted and will be reviewed by our team.');
-            } else {
-                addSystemMessage('There was an issue with your report. Please try again.');
-            }
-        });
-    }
-    
-    // Ensure chat screen is hidden by default
-    if (chatScreen) {
-        chatScreen.style.display = 'none';
-    }
-    
-    // Mobile keyboard detection and adjustment
-    function setupMobileKeyboardHandling() {
-        if (!isMobile) return;
-        
-        const chatInputArea = document.querySelector('.chat-input-area');
-        
-        // Method 1: Visual Viewport API (more reliable)
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', () => {
-                // Keyboard is likely visible if viewport height is significantly less than window height
-                const windowHeight = window.innerHeight;
-                const viewportHeight = window.visualViewport.height;
-                isKeyboardVisible = windowHeight - viewportHeight > 150;
-                
-                if (isKeyboardVisible) {
-                    // Move input above keyboard
-                    document.body.classList.add('keyboard-visible');
-                    chatInputArea.style.position = 'fixed';
-                    chatInputArea.style.bottom = `${windowHeight - window.visualViewport.height}px`;
-                    chatInputArea.style.width = '100%';
-                    chatInputArea.style.zIndex = '1000';
-                } else {
-                    // Reset to normal position
-                    document.body.classList.remove('keyboard-visible');
-                    chatInputArea.style.position = '';
-                    chatInputArea.style.bottom = '';
-                    chatInputArea.style.width = '';
-                }
-            });
-        } 
-        // Method 2: Focus/blur events (fallback)
-        else {
-            // For browsers without VisualViewport API
-            if (messageInput) {
-                messageInput.addEventListener('focus', () => {
-                    document.body.classList.add('keyboard-visible');
-                    chatInputArea.style.position = 'fixed';
-                    chatInputArea.style.bottom = '0';
-                    chatInputArea.style.width = '100%';
-                    chatInputArea.style.zIndex = '1000';
-                    
-                    // Give the keyboard time to appear
-                    setTimeout(() => {
-                        smoothScrollToBottom();
-                    }, 300);
-                });
-                
-                messageInput.addEventListener('blur', () => {
-                    document.body.classList.remove('keyboard-visible');
-                    chatInputArea.style.position = '';
-                    chatInputArea.style.bottom = '';
-                    chatInputArea.style.width = '';
-                });
-            }
-        }
-    }
-    
-    // Theme management
-    function setTheme(isDark) {
-        if (isDark) {
-            document.body.classList.add('dark-theme');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.body.classList.remove('dark-theme');
-            localStorage.setItem('theme', 'light');
-        }
-    }
-    
-    // Initialize theme from local storage
-    function initTheme() {
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        if (savedTheme === 'dark' || (savedTheme === null && prefersDark)) {
-            setTheme(true);
-            if (themeSwitch) themeSwitch.checked = true;
-        }
-    }
-    
-    // Theme toggle event
-    if (themeSwitch) {
-        themeSwitch.addEventListener('change', () => {
-            setTheme(themeSwitch.checked);
-        });
-    }
-    
-    // Initialize theme on load
-    initTheme();
-    
-    // Initialize nickname system
-    setupNickname();
-    
-    // Initialize settings menu
-    setupSettingsMenu();
-    
-    // Initialize report system
-    initializeReportSystem();
-    
-    // Apply user settings
-    applyUserSettings();
-    
-    // Functions to switch between screens
-    function showScreen(screen) {
-        document.querySelectorAll('.screen').forEach(s => {
-            s.classList.remove('active');
-            s.style.display = 'none';
-        });
-        
-        screen.classList.add('active');
-        screen.style.display = 'flex';
-        
-        // Ensure full screen mode for chat screen
-        if (screen === chatScreen) {
-            // Make sure the chat screen takes full height and has no extra space
-            chatScreen.style.height = '100%';
-            chatScreen.style.padding = '0';
-            chatScreen.style.margin = '0';
-            
-            // Reset scroll position
-            if (chatMessages) {
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-        } else {
-            window.scrollTo(0, 0);
-        }
-    }
-    
     // Format time for message bubbles
     function formatTime(date) {
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
     }
     
     // Format date for separators
@@ -556,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const separator = document.createElement('div');
             separator.className = 'date-separator';
             separator.innerHTML = `<span>${formatDate(currentDate)}</span>`;
-            chatMessages.appendChild(separator);
+            if (chatMessages) chatMessages.appendChild(separator);
             
             lastMessageDate = currentDate;
             return true;
@@ -568,6 +472,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Add a message to chat
     function addMessage(message, isSelf) {
+        if (!chatMessages) return;
+        
         const now = new Date();
         
         // Check if we need a date separator
@@ -581,7 +487,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const nicknameText = isSelf ? userNickname : 'Stranger';
         
         // Add formatted time as a data attribute
-        messageElement.setAttribute('data-time', formatTime(now));
+        const timeString = formatTime(now);
+        messageElement.setAttribute('data-time', timeString);
         
         // Add message content wrapper with nickname
         const contentElement = document.createElement('div');
@@ -628,56 +535,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    function smoothScrollToBottom() {
-        const target = chatMessages.scrollHeight;
-        const duration = 300;
-        const startTime = performance.now();
-        const startPos = chatMessages.scrollTop;
-        const distance = target - startPos;
-        
-        function scrollAnimation(currentTime) {
-            const elapsedTime = currentTime - startTime;
-            if (elapsedTime < duration) {
-                chatMessages.scrollTop = easeInOutCubic(elapsedTime, startPos, distance, duration);
-                requestAnimationFrame(scrollAnimation);
-            } else {
-                chatMessages.scrollTop = target;
-            }
-        }
-        
-        // Easing function for smooth scrolling
-        function easeInOutCubic(t, b, c, d) {
-            t /= d/2;
-            if (t < 1) return c/2*t*t*t + b;
-            t -= 2;
-            return c/2*(t*t*t + 2) + b;
-        }
-        
-        requestAnimationFrame(scrollAnimation);
-    }
-    
-    // Add system message
-    function addSystemMessage(message) {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message', 'system');
-        messageElement.textContent = message;
-        chatMessages.appendChild(messageElement);
-        
-        // Smooth scroll to bottom
-        smoothScrollToBottom();
-    }
-    
     // Play notification sound
     function playNotificationSound() {
-        const sound = new Audio('data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV');
-        sound.play();
+        try {
+            // Use a short beep sound in base64 to avoid loading external files
+            const sound = new Audio('data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV');
+            sound.volume = 0.5; // Set a reasonable volume
+            sound.play().catch(e => console.error('Error playing sound:', e));
+        } catch (e) {
+            console.error('Error with notification sound:', e);
+        }
     }
     
     // Translate message
     function translateMessage(messageElement) {
         const messageText = messageElement.querySelector('.message-text').textContent;
-        const originalLang = 'auto'; // Auto-detect
-        const targetLang = 'en'; // Target language (English)
         
         // Show loading indicator
         const translateBtn = messageElement.querySelector('.translate-btn');
@@ -704,36 +576,129 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
     
-    // Fix for iOS viewport height issue
-    function fixIOSViewportHeight() {
-        if (isIOS) {
-            const vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
+    // Add system message
+    function addSystemMessage(message) {
+        if (!chatMessages) return;
+        
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', 'system');
+        messageElement.textContent = message;
+        chatMessages.appendChild(messageElement);
+        
+        // Smooth scroll to bottom
+        smoothScrollToBottom();
+    }
+    
+    function smoothScrollToBottom() {
+        if (!chatMessages) return;
+        
+        chatMessages.scrollTo({
+            top: chatMessages.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+    
+    // Initialize all UI components
+    function initializeUI() {
+        // Make sure welcome screen is active
+        if (welcomeScreen) welcomeScreen.classList.add('active');
+        
+        // Initialize theme
+        initTheme();
+        
+        // Initialize nickname system
+        setupNickname();
+        
+        // Initialize settings menu
+        setupSettingsMenu();
+        
+        // Initialize report system - only when in chat
+        socket.on('matched', () => {
+            setupReportSystem();
+        });
+        
+        // Apply user settings
+        applyUserSettings();
+        
+        // Initialize search progress animation
+        if (progressBar) {
+            progressBar.style.width = '0%';
             
-            // Apply the height to the container
-            const appContainer = document.querySelector('.app-container');
-            if (appContainer) {
-                appContainer.style.height = `calc(var(--vh, 1vh) * 100)`;
-                appContainer.style.maxHeight = `calc(var(--vh, 1vh) * 100)`;
+            // Add animation
+            let progress = 0;
+            let direction = 1;
+            
+            function animateProgress() {
+                if (direction > 0) {
+                    progress += 0.5;
+                    if (progress >= 95) {
+                        direction = -1;
+                    }
+                } else {
+                    progress -= 0.5;
+                    if (progress <= 30) {
+                        direction = 1;
+                    }
+                }
+                
+                if (progressBar) {
+                    progressBar.style.width = progress + '%';
+                }
             }
+            
+            // Set up continuous animation while in waiting screen
+            const progressInterval = setInterval(() => {
+                if (waitingScreen.classList.contains('active')) {
+                    animateProgress();
+                }
+            }, 30);
+            
+            // Clean up on page unload
+            window.addEventListener('beforeunload', () => {
+                clearInterval(progressInterval);
+            });
         }
     }
     
-    // Initialize iOS viewport fix
-    fixIOSViewportHeight();
+    // Theme management
+    function setTheme(isDark) {
+        if (isDark) {
+            document.body.classList.add('dark-theme');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.classList.remove('dark-theme');
+            localStorage.setItem('theme', 'light');
+        }
+    }
     
-    // Update on resize
-    window.addEventListener('resize', () => {
-        fixIOSViewportHeight();
+    // Initialize theme from local storage
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (savedTheme === null && prefersDark)) {
+            setTheme(true);
+            if (themeSwitch) themeSwitch.checked = true;
+        }
+    }
+    
+    // Theme toggle event
+    if (themeSwitch) {
+        themeSwitch.addEventListener('change', () => {
+            setTheme(themeSwitch.checked);
+        });
+    }
+    
+    // Initialize UI
+    initializeUI();
+    
+    // Socket events
+    socket.on('connect', () => {
+        console.log('Connected to server');
     });
     
-    // Initialize mobile keyboard handling
-    setupMobileKeyboardHandling();
-    
-    // Add reconnection handling for Render.com
     socket.on('reconnect_attempt', () => {
         console.log('Attempting to reconnect...');
-        // Show reconnection message if in chat
         if (chatScreen && chatScreen.classList.contains('active')) {
             addSystemMessage('Connection lost. Attempting to reconnect...');
         }
@@ -753,24 +718,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Socket events
-    socket.on('connect', () => {
-        console.log('Connected to server');
-    });
-    
-    // Show chat screen when user is connected
     socket.on('matched', () => {
         chatActive = true;
-
-        // Display chat screen
+        
+        // Show chat screen
         if (chatScreen) {
             chatScreen.style.display = 'flex';
+            showScreen(chatScreen);
         }
-        showScreen(chatScreen);
-
+        
         if (statusText) statusText.textContent = 'Connected with Stranger';
-
-        // Update end chat button for mobile
+        
         if (endChatBtn) {
             if (window.innerWidth <= 768) {
                 endChatBtn.innerHTML = '<span class="btn-icon"><i class="fas fa-door-open"></i></span>';
@@ -778,16 +736,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 endChatBtn.innerHTML = '<span class="btn-icon"><i class="fas fa-door-open"></i></span><span class="btn-text">End Chat</span>';
             }
         }
-
-        // Clear previous messages if any
+        
         if (chatMessages) chatMessages.innerHTML = '';
-        lastMessageDate = null; // Reset date tracker
+        lastMessageDate = null;
         addSystemMessage('You are now connected with a stranger');
-
-        // Send the nickname to server
+        
         socket.emit('set nickname', userNickname);
-
-        // Focus on input field
+        
         setTimeout(() => {
             if (messageInput) messageInput.focus();
         }, 300);
@@ -800,8 +755,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     socket.on('typing', () => {
         if (typingIndicator) typingIndicator.style.display = 'flex';
-        
-        // Scroll to show typing indicator
         smoothScrollToBottom();
     });
     
@@ -829,14 +782,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Button click events
     if (startChatBtn) {
         startChatBtn.addEventListener('click', () => {
-            if (welcomeScreen) welcomeScreen.style.display = 'none';
             showScreen(waitingScreen);
             socket.emit('find match');
             
-            // Add button click effect
             startChatBtn.classList.add('clicked');
             setTimeout(() => {
                 startChatBtn.classList.remove('clicked');
@@ -847,7 +797,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cancelSearchBtn) {
         cancelSearchBtn.addEventListener('click', () => {
             socket.emit('cancel search');
-            if (waitingScreen) waitingScreen.style.display = 'none';
             showScreen(welcomeScreen);
         });
     }
@@ -870,7 +819,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 addSystemMessage('You disconnected');
             } else {
-                // Clear chat history
                 if (chatMessages) chatMessages.innerHTML = '';
                 
                 if (window.innerWidth <= 768) {
@@ -884,21 +832,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const statusDot = document.querySelector('.status-dot');
                 if (statusDot) statusDot.style.backgroundColor = 'var(--success)';
                 
-                if (chatScreen) chatScreen.style.display = 'none';
                 showScreen(waitingScreen);
                 socket.emit('find match');
             }
         });
     }
     
-    // New Topic button functionality
     if (newTopicBtn) {
         newTopicBtn.addEventListener('click', () => {
             if (chatActive) {
                 const randomTopic = chatTopics[Math.floor(Math.random() * chatTopics.length)];
                 addSystemMessage(`Suggested topic: ${randomTopic}`);
                 
-                // Animate button
                 newTopicBtn.classList.add('clicked');
                 setTimeout(() => {
                     newTopicBtn.classList.remove('clicked');
@@ -907,12 +852,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Add event listeners for message input and send button
     if (sendMessageBtn) {
         sendMessageBtn.addEventListener('click', sendMessage);
     }
 
-    // Prevent textarea from capturing Enter key for form submission
     if (messageInput) {
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -920,11 +863,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 sendMessage();
             }
             
-            // Emit typing event
             if (chatActive) {
                 socket.emit('typing');
-                
-                // Clear previous timeout
                 clearTimeout(typingTimeout);
                 typingTimeout = setTimeout(() => {
                     socket.emit('stop typing');
@@ -932,18 +872,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Auto-resize textarea as user types
         messageInput.addEventListener('input', function() {
-            // Reset height to auto to correctly calculate new height
             this.style.height = 'auto';
-            
-            // Set the new height based on scroll height (max 100px)
             const newHeight = Math.min(this.scrollHeight, 100);
             this.style.height = newHeight + 'px';
         });
     }
 
-    // Send message function
     function sendMessage() {
         if (!messageInput) return;
         
@@ -953,74 +888,17 @@ document.addEventListener('DOMContentLoaded', () => {
             socket.emit('stop typing');
             addMessage(message, true);
             messageInput.value = '';
-            
-            // Reset textarea height
             messageInput.style.height = 'auto';
-            
-            // Focus back on input
             messageInput.focus();
             
-            // Add send button animation
             sendMessageBtn.classList.add('clicked');
             setTimeout(() => {
                 sendMessageBtn.classList.remove('clicked');
             }, 200);
             
-            // Ensure input stays visible on mobile
             if (isKeyboardVisible) {
                 smoothScrollToBottom();
             }
         }
     }
-
-    // Handle mobile keyboard adjustments
-    if ('virtualKeyboard' in navigator) {
-        navigator.virtualKeyboard.overlaysContent = true;
-        
-        navigator.virtualKeyboard.addEventListener('geometrychange', event => {
-            const chatInputArea = document.querySelector('.chat-input-area');
-            if (event.target.boundingRect.height > 0) {
-                // Keyboard is visible
-                document.body.classList.add('keyboard-visible');
-                chatInputArea.style.position = 'fixed';
-                chatInputArea.style.bottom = `${event.target.boundingRect.height}px`;
-                chatInputArea.style.width = '100%';
-                chatInputArea.style.zIndex = '1000';
-            } else {
-                // Keyboard is hidden
-                document.body.classList.remove('keyboard-visible');
-                chatInputArea.style.position = '';
-                chatInputArea.style.bottom = '';
-                chatInputArea.style.width = '';
-            }
-        });
-    }
-    
-    // Handle visibility change
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && chatActive) {
-            // Notify server that user is active again if needed
-        }
-    });
-    
-    // Prevent zooming on double tap for touch devices
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', (e) => {
-        const now = Date.now();
-        if (now - lastTouchEnd < 300) {
-            e.preventDefault();
-        }
-        lastTouchEnd = now;
-    }, false);
-
-    // Add button animation class
-    const buttons = document.querySelectorAll('.btn');
-    buttons.forEach(button => {
-        button.addEventListener('click', function() {
-            this.classList.add('btn-click');
-            setTimeout(() => {
-                this.classList.remove('btn-click');
-            }, 300);
-        });
-    });
 });

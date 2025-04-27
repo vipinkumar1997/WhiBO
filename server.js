@@ -65,9 +65,7 @@ const stats = {
     activeChats: 0,
     messagesToday: 0,
     chatLogs: [],
-    userActivity: Array(24).fill(0), // Hourly activity for the last 24 hours
-    reportedUsers: [], // New: Track reported users
-    totalReports: 0 // New: Count total reports
+    userActivity: Array(24).fill(0) // Hourly activity for the last 24 hours
 };
 
 // Queue for users waiting to be matched
@@ -78,22 +76,6 @@ let chatPairs = new Map();
 
 // User connections (key: socket id, value: user data)
 let users = new Map();
-
-// Inappropriate word filter - basic implementation
-const inappropriateWords = [
-    'badword1', 'badword2', 'badword3'
-    // Add more words to filter
-];
-
-// Filter message for inappropriate content
-function filterMessage(message) {
-    let filteredMessage = message;
-    inappropriateWords.forEach(word => {
-        const regex = new RegExp(word, 'gi');
-        filteredMessage = filteredMessage.replace(regex, '***');
-    });
-    return filteredMessage;
-}
 
 // Generate a chat ID
 function generateChatId() {
@@ -112,79 +94,14 @@ io.on('connection', (socket) => {
     const hour = new Date().getHours();
     stats.userActivity[hour]++;
     
-    // Store user data with default nickname
+    // Store user data
     users.set(socket.id, {
         id: socket.id,
         status: 'idle',
         connectedSince: Date.now(),
         partner: null,
         chatId: null,
-        messagesSent: 0,
-        nickname: `User_${socket.id.substring(0, 5)}`, // Default nickname
-        reports: [] // Track reports for this user
-    });
-    
-    // User sets their nickname
-    socket.on('set nickname', (nickname) => {
-        const userData = users.get(socket.id);
-        if (userData) {
-            // Sanitize nickname
-            const cleanNickname = nickname.replace(/[^\w\s]/gi, '').substring(0, 20);
-            userData.nickname = cleanNickname || `User_${socket.id.substring(0, 5)}`;
-            users.set(socket.id, userData);
-            console.log(`${socket.id} set nickname: ${userData.nickname}`);
-            
-            // Notify admin clients
-            emitAdminUpdates();
-        }
-    });
-    
-    // User reports another user
-    socket.on('report user', (reportData) => {
-        const partnerId = chatPairs.get(socket.id);
-        if (!partnerId) {
-            socket.emit('report response', { status: 'error', message: 'No chat partner found' });
-            return;
-        }
-        
-        const partner = users.get(partnerId);
-        if (!partner) {
-            socket.emit('report response', { status: 'error', message: 'Partner data not found' });
-            return;
-        }
-        
-        // Create report
-        const report = {
-            id: crypto.randomBytes(4).toString('hex'),
-            reporterId: socket.id,
-            reportedId: partnerId,
-            reason: reportData.reason,
-            details: reportData.details,
-            timestamp: Date.now(),
-            status: 'pending'
-        };
-        
-        // Add report to user's data
-        if (!partner.reports) {
-            partner.reports = [];
-        }
-        partner.reports.push(report);
-        users.set(partnerId, partner);
-        
-        // Add to global stats
-        stats.reportedUsers.push({
-            userId: partnerId,
-            report: report
-        });
-        stats.totalReports++;
-        
-        // Send response to user
-        socket.emit('report response', { status: 'success', message: 'Report submitted' });
-        
-        // Notify admin clients
-        emitAdminUpdates();
-        
-        console.log(`User ${socket.id} reported ${partnerId} for ${reportData.reason}`);
+        messagesSent: 0
     });
     
     // User wants to find a match
@@ -243,8 +160,6 @@ io.on('connection', (socket) => {
                     id: chatId,
                     user1: socket.id,
                     user2: partnerId,
-                    user1Nickname: userData ? userData.nickname : 'Anonymous',
-                    user2Nickname: partnerData ? partnerData.nickname : 'Anonymous',
                     startTime: Date.now(),
                     endTime: null,
                     duration: 0,
@@ -291,10 +206,7 @@ io.on('connection', (socket) => {
         if (partnerId) {
             const partnerSocket = io.sockets.sockets.get(partnerId);
             if (partnerSocket) {
-                // Filter message for inappropriate content
-                const filteredMessage = filterMessage(message);
-                
-                partnerSocket.emit('chat message', filteredMessage);
+                partnerSocket.emit('chat message', message);
                 
                 // Update stats
                 stats.messagesToday++;
@@ -417,8 +329,7 @@ adminIo.on('connection', (socket) => {
             totalUsers: stats.totalUsers,
             onlineUsers: stats.onlineUsers,
             activeChats: stats.activeChats,
-            messagesToday: stats.messagesToday,
-            totalReports: stats.totalReports // New stat
+            messagesToday: stats.messagesToday
         });
     });
     
@@ -443,44 +354,6 @@ adminIo.on('connection', (socket) => {
         socket.emit('chat_logs_update', filteredLogs);
     });
     
-    // Admin requests report logs
-    socket.on('get_reports', () => {
-        socket.emit('report_logs_update', stats.reportedUsers);
-    });
-    
-    // Admin handles a report
-    socket.on('handle_report', (data) => {
-        const { reportId, action } = data;
-        
-        // Find the report
-        const reportIndex = stats.reportedUsers.findIndex(item => item.report.id === reportId);
-        if (reportIndex >= 0) {
-            stats.reportedUsers[reportIndex].report.status = action;
-            stats.reportedUsers[reportIndex].report.handledAt = Date.now();
-            
-            // If action is 'ban', handle user ban
-            if (action === 'ban') {
-                const userId = stats.reportedUsers[reportIndex].userId;
-                banUser(userId);
-            }
-            
-            socket.emit('report_handled', { success: true, reportId });
-            emitAdminUpdates();
-        } else {
-            socket.emit('report_handled', { success: false, reportId, error: 'Report not found' });
-        }
-    });
-    
-    // Handle user ban
-    function banUser(userId) {
-        // In a real app, you would add to a banned users database
-        // For now, just disconnect if they're still connected
-        const userSocket = io.sockets.sockets.get(userId);
-        if (userSocket) {
-            userSocket.disconnect(true);
-        }
-    }
-    
     // Admin disconnects a user
     socket.on('disconnect_user', (data) => {
         if (data && data.userId) {
@@ -499,18 +372,6 @@ adminIo.on('connection', (socket) => {
         }
         socket.emit('chat_logs_update', stats.chatLogs);
     });
-    
-    // Reset stats manually
-    socket.on('reset_stats', () => {
-        stats.messagesToday = 0;
-        socket.emit('stats_update', {
-            totalUsers: stats.totalUsers,
-            onlineUsers: stats.onlineUsers,
-            activeChats: stats.activeChats,
-            messagesToday: stats.messagesToday,
-            totalReports: stats.totalReports
-        });
-    });
 });
 
 // Helper function to emit updates to all admin clients
@@ -519,8 +380,7 @@ function emitAdminUpdates() {
         totalUsers: stats.totalUsers,
         onlineUsers: stats.onlineUsers,
         activeChats: stats.activeChats,
-        messagesToday: stats.messagesToday,
-        totalReports: stats.totalReports
+        messagesToday: stats.messagesToday
     });
     
     adminIo.emit('active_users_update', Array.from(users.values()));

@@ -57,20 +57,32 @@
                     <span class="status-dot"></span>
                     <span class="status-text">Chatting with a stranger</span>
                 </div>
-                <button id="end-chat" class="danger-btn">
-                    <i class="fas fa-sign-out-alt"></i> <span class="btn-text">End Chat</span>
-                </button>
-            </div>
-            <div id="chat-messages"></div>
-            <div id="typing-indicator">
-                <div class="typing-dots">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                <div class="chat-actions">
+                    <button class="action-btn" id="new-topic-btn" title="Suggest New Topic">
+                        <i class="fas fa-lightbulb"></i>
+                    </button>
+                    <button id="end-chat" class="danger-btn">
+                        <i class="fas fa-sign-out-alt"></i> <span class="btn-text">End Chat</span>
+                    </button>
                 </div>
-                <span>Stranger is typing...</span>
             </div>
+            
+            <div class="chat-container">
+                <div id="chat-messages"></div>
+                <div id="typing-indicator">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span>Stranger is typing...</span>
+                </div>
+            </div>
+            
             <div id="chat-input">
+                <button class="emoji-btn" id="emoji-btn">
+                    <i class="far fa-smile"></i>
+                </button>
                 <textarea id="message-input" placeholder="Type a message..."></textarea>
                 <button id="send-message">
                     <i class="fas fa-paper-plane"></i>

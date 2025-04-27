@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const startChatBtn = document.getElementById('start-chat');
     const cancelSearchBtn = document.getElementById('cancel-search');
     const endChatBtn = document.getElementById('end-chat');
+    const messageInput = document.getElementById('message-input');
+    const sendMessageBtn = document.getElementById('send-message');
     const chatMessages = document.getElementById('chat-messages');
     const typingIndicator = document.getElementById('typing-indicator');
     const statusText = document.querySelector('.status-text');
@@ -42,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let typingTimeout;
     let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     
-    // Make sure chat screen is initially hidden
+    // Ensure chat screen is hidden by default
     if (chatScreen) {
         chatScreen.style.display = 'none';
     }
@@ -212,17 +214,18 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Connected to server');
     });
     
+    // Show chat screen when user is connected
     socket.on('matched', () => {
         chatActive = true;
-        
-        // Make sure chat screen is visible when a match is found
+
+        // Display chat screen
         if (chatScreen) {
             chatScreen.style.display = 'flex';
         }
         showScreen(chatScreen);
-        
+
         if (statusText) statusText.textContent = 'Connected with Stranger';
-        
+
         // Update end chat button for mobile
         if (endChatBtn) {
             if (window.innerWidth <= 768) {
@@ -231,10 +234,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 endChatBtn.innerHTML = '<span class="btn-icon"><i class="fas fa-door-open"></i></span><span class="btn-text">End Chat</span>';
             }
         }
-        
+
         // Clear previous messages if any
         if (chatMessages) chatMessages.innerHTML = '';
         addSystemMessage('You are now connected with a stranger');
+
+        // Focus on input field
+        setTimeout(() => {
+            if (messageInput) messageInput.focus();
+        }, 300);
     });
     
     socket.on('chat message', (message) => {
@@ -350,7 +358,68 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
+    // Add event listeners for message input and send button
+    if (sendMessageBtn) {
+        sendMessageBtn.addEventListener('click', sendMessage);
+    }
+
+    // Prevent textarea from capturing Enter key for form submission
+    if (messageInput) {
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+            
+            // Emit typing event
+            if (chatActive) {
+                socket.emit('typing');
+                
+                // Clear previous timeout
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    socket.emit('stop typing');
+                }, 1000);
+            }
+        });
+        
+        // Auto-resize textarea as user types
+        messageInput.addEventListener('input', function() {
+            // Reset height to auto to correctly calculate new height
+            this.style.height = 'auto';
+            
+            // Set the new height based on scroll height (max 100px)
+            const newHeight = Math.min(this.scrollHeight, 100);
+            this.style.height = newHeight + 'px';
+        });
+    }
+
+    // Send message function
+    function sendMessage() {
+        if (!messageInput) return;
+        
+        const message = messageInput.value.trim();
+        if (message && chatActive) {
+            socket.emit('chat message', message);
+            socket.emit('stop typing');
+            addMessage(message, true);
+            messageInput.value = '';
+            
+            // Reset textarea height
+            messageInput.style.height = 'auto';
+            
+            // Focus back on input
+            messageInput.focus();
+            
+            // Add send button animation
+            sendMessageBtn.classList.add('clicked');
+            setTimeout(() => {
+                sendMessageBtn.classList.remove('clicked');
+            }, 200);
+        }
+    }
+
     // Handle mobile keyboard adjustments
     if ('virtualKeyboard' in navigator) {
         navigator.virtualKeyboard.overlaysContent = true;

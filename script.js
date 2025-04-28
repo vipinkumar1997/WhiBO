@@ -105,8 +105,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show the requested screen
         if (screen) {
             screen.classList.add('active');
+            // Set display for chat screen when it becomes active
             if (screen === chatScreen) {
+                // Ensure chat screen is fully initialized with flex display before showing
                 chatScreen.style.display = 'flex';
+                // Force a reflow to ensure the display change takes effect
+                void chatScreen.offsetWidth;
             }
         }
     }
@@ -721,9 +725,13 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('matched', () => {
         chatActive = true;
         
-        // Show chat screen
+        // Show chat screen with proper styling
         if (chatScreen) {
+            // First ensure the display property is set before showing the screen
             chatScreen.style.display = 'flex';
+            // Force a reflow to ensure the display change takes effect
+            void chatScreen.offsetWidth;
+            // Then activate the screen which applies the right CSS
             showScreen(chatScreen);
         }
         

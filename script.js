@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
         transports: ['websocket', 'polling']
     });
     
-    // DOM Elements
+    // DOM Elements - Add new UI elements
     const welcomeScreen = document.getElementById('welcome-screen');
     const waitingScreen = document.getElementById('waiting-screen');
     const chatScreen = document.getElementById('chat-screen');
@@ -24,6 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const newTopicBtn = document.getElementById('new-topic-btn');
     const themeSwitch = document.getElementById('theme-switch');
     const progressBar = document.querySelector('.search-progress-bar');
+    
+    // New UI Elements
+    const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+    const chatSidebar = document.querySelector('.chat-sidebar');
+    const emojiBtn = document.getElementById('emoji-btn');
+    const toggleEmojiBtn = document.getElementById('toggle-emoji-btn');
+    const emojiPicker = document.querySelector('.emoji-picker');
+    const closeEmojiBtn = document.getElementById('close-emoji');
+    const emojiCategories = document.querySelectorAll('.emoji-category');
+    const emojiChars = document.querySelectorAll('.emoji-char');
+    const attachBtn = document.getElementById('attach-btn');
     
     // Chat topics for suggestions
     const chatTopics = [
@@ -49,6 +60,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastMessageDate = null;
     let userNickname = localStorage.getItem('whibo-nickname') || generateRandomNickname();
     let userSettings = loadUserSettings();
+    
+    // New state variables
+    let isSidebarVisible = window.innerWidth > 768; // Default visible on desktop
+    let isEmojiPickerVisible = false;
     
     // Load user settings from localStorage
     function loadUserSettings() {
@@ -109,6 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (screen === chatScreen) {
                 // Ensure chat screen is fully initialized with flex display before showing
                 chatScreen.style.display = 'flex';
+                
+                // Reset sidebar visibility based on screen size
+                if (chatSidebar) {
+                    isSidebarVisible = window.innerWidth > 768;
+                    chatSidebar.style.transform = isSidebarVisible ? 'translateX(0)' : 'translateX(-100%)';
+                }
+                
                 // Force a reflow to ensure the display change takes effect
                 void chatScreen.offsetWidth;
                 
@@ -485,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     }
     
-    // Add a message to chat
+    // Add a message to chat with enhanced design
     function addMessage(message, isSelf) {
         if (!chatMessages) return;
         
@@ -558,7 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
     }
     
-    // Add system message
+    // Add system message with improved styling
     function addSystemMessage(message) {
         if (!chatMessages) return;
         
@@ -567,7 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Add icon for better visual hierarchy
         messageElement.innerHTML = `
-            <i class="fas fa-info-circle message-icon"></i>
+            <i class="fas fa-info-circle"></i>
             <span class="message-text">${message}</span>
         `;
         
@@ -631,73 +653,163 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Toggle chat sidebar visibility
+    function toggleSidebar() {
+        if (!chatSidebar) return;
+        
+        isSidebarVisible = !isSidebarVisible;
+        chatSidebar.style.transform = isSidebarVisible ? 'translateX(0)' : 'translateX(-100%)';
+        
+        // Add visible class for styling
+        if (isSidebarVisible) {
+            chatSidebar.classList.add('visible');
+        } else {
+            chatSidebar.classList.remove('visible');
+        }
+    }
+    
+    // Toggle emoji picker visibility
+    function toggleEmojiPicker() {
+        if (!emojiPicker) return;
+        
+        isEmojiPickerVisible = !isEmojiPickerVisible;
+        emojiPicker.style.display = isEmojiPickerVisible ? 'flex' : 'none';
+        
+        // If showing the picker, focus the input
+        if (isEmojiPickerVisible && messageInput) {
+            setTimeout(() => messageInput.focus(), 100);
+        }
+    }
+    
+    // Insert emoji into message input
+    function insertEmoji(emoji) {
+        if (!messageInput) return;
+        
+        const startPos = messageInput.selectionStart;
+        const endPos = messageInput.selectionEnd;
+        const textBefore = messageInput.value.substring(0, startPos);
+        const textAfter = messageInput.value.substring(endPos);
+        
+        messageInput.value = textBefore + emoji + textAfter;
+        
+        // Set cursor position after the inserted emoji
+        messageInput.selectionStart = startPos + emoji.length;
+        messageInput.selectionEnd = startPos + emoji.length;
+        
+        // Focus back on the input
+        messageInput.focus();
+    }
+    
     // Handle window resize for responsive layout
     window.addEventListener('resize', () => {
         isMobile = isIOS || isAndroid || window.innerWidth <= 768;
-        adjustLayoutForScreenSize();
-    });
-    
-    // Adjust layout based on screen size
-    function adjustLayoutForScreenSize() {
+        
+        // Update sidebar visibility based on screen size
         if (window.innerWidth <= 768) {
-            // Mobile optimizations
-            if (endChatBtn && endChatBtn.querySelector('.btn-text')) {
-                endChatBtn.querySelector('.btn-text').style.display = 'none';
-            }
-        } else {
-            // Desktop optimizations
-            if (endChatBtn && endChatBtn.querySelector('.btn-text')) {
-                endChatBtn.querySelector('.btn-text').style.display = 'inline';
-            }
+            isSidebarVisible = false;
+            if (chatSidebar) chatSidebar.style.transform = 'translateX(-100%)';
         }
         
-        // Adjust max message width based on screen size
-        const messages = document.querySelectorAll('.message:not(.system)');
-        const maxWidth = window.innerWidth <= 576 ? '85%' : '75%';
-        
-        messages.forEach(msg => {
-            msg.style.maxWidth = maxWidth;
+        // Close emoji picker on small screens when resizing
+        if (window.innerWidth <= 576 && isEmojiPickerVisible) {
+            isEmojiPickerVisible = false;
+            if (emojiPicker) emojiPicker.style.display = 'none';
+        }
+    });
+    
+    // Handle click outside emoji picker to close it
+    document.addEventListener('click', (e) => {
+        if (isEmojiPickerVisible && 
+            emojiPicker && 
+            !emojiPicker.contains(e.target) && 
+            e.target !== emojiBtn &&
+            e.target !== toggleEmojiBtn) {
+            isEmojiPickerVisible = false;
+            emojiPicker.style.display = 'none';
+        }
+    });
+    
+    // Show commands when typing /help
+    if (messageInput) {
+        messageInput.addEventListener('input', function() {
+            // Auto-resize textarea based on content
+            this.style.height = 'auto';
+            const newHeight = Math.min(this.scrollHeight, 120);
+            this.style.height = newHeight + 'px';
+            
+            // Check for help command
+            const text = this.value.trim();
+            if (text === '/help') {
+                // Clear input and show help message
+                this.value = '';
+                addSystemMessage('Available commands: /clear to clear chat, /nick to change nickname, /topic for a new topic suggestion');
+            } else if (text === '/clear') {
+                // Clear chat messages
+                this.value = '';
+                if (chatMessages) chatMessages.innerHTML = '';
+                addSystemMessage('Chat history cleared');
+            } else if (text === '/topic') {
+                // Suggest a new topic
+                this.value = '';
+                if (newTopicBtn) newTopicBtn.click();
+            } else if (text === '/nick') {
+                // Open nickname dialog
+                this.value = '';
+                showNicknameDialog();
+            }
         });
     }
     
-    // Handle fullscreen mode
-    function toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.log(`Error attempting to enable fullscreen: ${err.message}`);
-            });
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            }
-        }
+    // Attach file button (placeholder for future functionality)
+    if (attachBtn) {
+        attachBtn.addEventListener('click', () => {
+            addSystemMessage('File attachments coming soon!');
+        });
     }
     
-    // Setup fullscreen button in settings dialog
-    function enhanceSettingsDialog() {
-        const originalShowSettings = showSettingsDialog;
-        
-        showSettingsDialog = function() {
-            originalShowSettings();
-            
-            // Add fullscreen option to settings if supported
-            if (document.documentElement.requestFullscreen) {
-                const dialog = document.querySelector('.settings-dialog .setting-group');
-                if (dialog) {
-                    const fullscreenSetting = document.createElement('div');
-                    fullscreenSetting.className = 'setting-item';
-                    fullscreenSetting.innerHTML = `
-                        <button id="toggle-fullscreen" class="btn secondary-btn">
-                            <i class="fas fa-expand"></i> Toggle Fullscreen
-                        </button>
-                    `;
-                    dialog.appendChild(fullscreenSetting);
-                    
-                    document.getElementById('toggle-fullscreen').addEventListener('click', toggleFullscreen);
-                }
-            }
-        };
+    // Add event listeners for new UI elements
+    if (toggleSidebarBtn) {
+        toggleSidebarBtn.addEventListener('click', toggleSidebar);
     }
+    
+    if (emojiBtn) {
+        emojiBtn.addEventListener('click', toggleEmojiPicker);
+    }
+    
+    if (toggleEmojiBtn) {
+        toggleEmojiBtn.addEventListener('click', toggleEmojiPicker);
+    }
+    
+    if (closeEmojiBtn) {
+        closeEmojiBtn.addEventListener('click', toggleEmojiPicker);
+    }
+    
+    // Add click events for emoji categories
+    emojiCategories.forEach(category => {
+        category.addEventListener('click', () => {
+            // Remove active class from all categories
+            emojiCategories.forEach(cat => cat.classList.remove('active'));
+            
+            // Add active class to clicked category
+            category.classList.add('active');
+            
+            // Show corresponding emoji group
+            const categoryName = category.getAttribute('data-category');
+            document.querySelectorAll('.emoji-group').forEach(group => {
+                group.style.display = 'none';
+            });
+            
+            const activeGroup = document.querySelector(`.emoji-group[data-category="${categoryName}"]`);
+            if (activeGroup) activeGroup.style.display = 'flex';
+        });
+    });
+    
+    // Add click events for emoji characters
+    emojiChars.forEach(emoji => {
+        emoji.addEventListener('click', () => {
+            insertEmoji(emoji.getAttribute('data-emoji'));
+        });
+    });
     
     // Initialize enhanced UI
     function initializeEnhancedUI() {

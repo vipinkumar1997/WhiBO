@@ -111,6 +111,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 chatScreen.style.display = 'flex';
                 // Force a reflow to ensure the display change takes effect
                 void chatScreen.offsetWidth;
+                
+                // Add animation class for smoother transition
+                chatScreen.classList.add('animated-entry');
+                setTimeout(() => {
+                    chatScreen.classList.remove('animated-entry');
+                }, 500);
+                
+                // Set focus to input after transition
+                setTimeout(() => {
+                    if (messageInput) messageInput.focus();
+                }, 300);
             }
         }
     }
@@ -487,6 +498,9 @@ document.addEventListener('DOMContentLoaded', () => {
         messageElement.classList.add('message');
         messageElement.classList.add(isSelf ? 'self' : 'stranger');
         
+        // Add animation class based on message sender
+        messageElement.classList.add(isSelf ? 'message-in-right' : 'message-in-left');
+        
         // Add nickname for non-system messages
         const nicknameText = isSelf ? userNickname : 'Stranger';
         
@@ -534,16 +548,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Add haptic feedback on mobile
-        if (!isSelf && navigator.vibrate && window.innerWidth <= 768) {
+        if (!isSelf && navigator.vibrate && isMobile) {
             navigator.vibrate(50);
         }
+        
+        // Remove animation class after animation completes
+        setTimeout(() => {
+            messageElement.classList.remove('message-in-right', 'message-in-left');
+        }, 500);
+    }
+    
+    // Add system message
+    function addSystemMessage(message) {
+        if (!chatMessages) return;
+        
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', 'system');
+        
+        // Add icon for better visual hierarchy
+        messageElement.innerHTML = `
+            <i class="fas fa-info-circle message-icon"></i>
+            <span class="message-text">${message}</span>
+        `;
+        
+        chatMessages.appendChild(messageElement);
+        
+        // Smooth scroll to bottom
+        smoothScrollToBottom();
     }
     
     // Play notification sound
     function playNotificationSound() {
         try {
             // Use a short beep sound in base64 to avoid loading external files
-            const sound = new Audio('data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV');
+            const sound = new Audio('data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV');
             sound.volume = 0.5; // Set a reasonable volume
             sound.play().catch(e => console.error('Error playing sound:', e));
         } catch (e) {
@@ -580,26 +618,124 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
     
-    // Add system message
-    function addSystemMessage(message) {
-        if (!chatMessages) return;
-        
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message', 'system');
-        messageElement.textContent = message;
-        chatMessages.appendChild(messageElement);
-        
-        // Smooth scroll to bottom
-        smoothScrollToBottom();
-    }
-    
+    // Enhanced smooth scroll with better animation
     function smoothScrollToBottom() {
         if (!chatMessages) return;
         
-        chatMessages.scrollTo({
-            top: chatMessages.scrollHeight,
-            behavior: 'smooth'
+        // Use requestAnimationFrame for smoother scrolling
+        requestAnimationFrame(() => {
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
         });
+    }
+    
+    // Handle window resize for responsive layout
+    window.addEventListener('resize', () => {
+        isMobile = isIOS || isAndroid || window.innerWidth <= 768;
+        adjustLayoutForScreenSize();
+    });
+    
+    // Adjust layout based on screen size
+    function adjustLayoutForScreenSize() {
+        if (window.innerWidth <= 768) {
+            // Mobile optimizations
+            if (endChatBtn && endChatBtn.querySelector('.btn-text')) {
+                endChatBtn.querySelector('.btn-text').style.display = 'none';
+            }
+        } else {
+            // Desktop optimizations
+            if (endChatBtn && endChatBtn.querySelector('.btn-text')) {
+                endChatBtn.querySelector('.btn-text').style.display = 'inline';
+            }
+        }
+        
+        // Adjust max message width based on screen size
+        const messages = document.querySelectorAll('.message:not(.system)');
+        const maxWidth = window.innerWidth <= 576 ? '85%' : '75%';
+        
+        messages.forEach(msg => {
+            msg.style.maxWidth = maxWidth;
+        });
+    }
+    
+    // Handle fullscreen mode
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
+    
+    // Setup fullscreen button in settings dialog
+    function enhanceSettingsDialog() {
+        const originalShowSettings = showSettingsDialog;
+        
+        showSettingsDialog = function() {
+            originalShowSettings();
+            
+            // Add fullscreen option to settings if supported
+            if (document.documentElement.requestFullscreen) {
+                const dialog = document.querySelector('.settings-dialog .setting-group');
+                if (dialog) {
+                    const fullscreenSetting = document.createElement('div');
+                    fullscreenSetting.className = 'setting-item';
+                    fullscreenSetting.innerHTML = `
+                        <button id="toggle-fullscreen" class="btn secondary-btn">
+                            <i class="fas fa-expand"></i> Toggle Fullscreen
+                        </button>
+                    `;
+                    dialog.appendChild(fullscreenSetting);
+                    
+                    document.getElementById('toggle-fullscreen').addEventListener('click', toggleFullscreen);
+                }
+            }
+        };
+    }
+    
+    // Initialize enhanced UI
+    function initializeEnhancedUI() {
+        initializeUI();
+        enhanceSettingsDialog();
+        adjustLayoutForScreenSize();
+        
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(50px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideInLeft {
+                from { transform: translateX(-50px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            .message-in-right {
+                animation: slideInRight 0.3s ease-out forwards;
+            }
+            
+            .message-in-left {
+                animation: slideInLeft 0.3s ease-out forwards;
+            }
+            
+            .animated-entry {
+                animation: fadeIn 0.4s ease-out;
+            }
+            
+            .message-icon {
+                margin-right: 6px;
+                color: var(--primary);
+            }
+        `;
+        document.head.appendChild(style);
     }
     
     // Initialize all UI components
@@ -693,8 +829,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Initialize UI
-    initializeUI();
+    // Use enhanced initialization instead of basic one
+    initializeEnhancedUI();
     
     // Socket events
     socket.on('connect', () => {

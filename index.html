@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <meta name="description" content="WhiBO - Chat with random strangers anonymously from around the world">
@@ -119,46 +119,134 @@
             </div>
         </div>
         
-        <!-- Chat Screen - Initially hidden, will show only after connection -->
+        <!-- Chat Screen - Redesigned with modern UI -->
         <div id="chat-screen" class="screen" style="display: none;">
-            <div class="chat-header">
-                <div class="chat-status">
-                    <div class="status-indicator">
-                        <span class="status-dot"></span>
-                        <span class="status-text">Connected with Stranger</span>
+            <div class="chat-container">
+                <!-- Chat Sidebar -->
+                <div class="chat-sidebar">
+                    <div class="sidebar-header">
+                        <div class="chat-status">
+                            <div class="status-indicator">
+                                <span class="status-dot"></span>
+                                <span class="status-text">Connected with Stranger</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="chat-actions">
-                    <button class="btn icon-btn" id="new-topic-btn" title="Suggest New Topic">
-                        <i class="fas fa-lightbulb"></i>
-                    </button>
-                    <button id="end-chat" class="btn danger-btn">
-                        <span class="btn-icon"><i class="fas fa-door-open"></i></span>
-                        <span class="btn-text">End Chat</span>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="chat-main">
-                <div id="chat-messages"></div>
-                <div id="typing-indicator">
-                    <div class="typing-bubble">
-                        <div class="typing-dots">
-                            <span></span>
-                            <span></span>
-                            <span></span>
+                    
+                    <div class="sidebar-actions">
+                        <button class="sidebar-btn" id="new-topic-btn" title="Suggest New Topic">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>New Topic</span>
+                        </button>
+                        
+                        <button class="sidebar-btn" id="toggle-emoji-btn" title="Insert Emoji">
+                            <i class="far fa-smile"></i>
+                            <span>Emoji</span>
+                        </button>
+                        
+                        <button class="sidebar-btn danger" id="end-chat">
+                            <i class="fas fa-door-open"></i>
+                            <span>End Chat</span>
+                        </button>
+                    </div>
+                    
+                    <div class="chat-info">
+                        <div class="info-box">
+                            <h3><i class="fas fa-info-circle"></i> Chat Tips</h3>
+                            <ul class="chat-tips">
+                                <li>Be respectful to your chat partner</li>
+                                <li>Press <kbd>Enter</kbd> to send message</li>
+                                <li>Press <kbd>Shift</kbd> + <kbd>Enter</kbd> for new line</li>
+                                <li>Type <kbd>/help</kbd> for more commands</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="chat-input-area">
-                <div class="input-container">
-                    <textarea id="message-input" placeholder="Type a message..." rows="1"></textarea>
+                
+                <!-- Main Chat Area -->
+                <div class="chat-main-container">
+                    <div class="chat-header-main">
+                        <div class="chat-header-info">
+                            <div class="stranger-avatar">
+                                <i class="fas fa-user-secret"></i>
+                            </div>
+                            <div class="stranger-status">
+                                <div class="stranger-name">Anonymous Stranger</div>
+                                <div class="status-indicator">
+                                    <span class="status-dot"></span>
+                                    <span class="status-text-small">Active Now</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-header-actions">
+                            <button class="icon-action" id="toggle-sidebar" title="Toggle Sidebar">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-main">
+                        <div class="chat-background"></div>
+                        <div id="chat-messages"></div>
+                        <div id="typing-indicator">
+                            <div class="typing-bubble">
+                                <div class="typing-avatar">
+                                    <i class="fas fa-user-secret"></i>
+                                </div>
+                                <div class="typing-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <button class="input-action-btn" id="emoji-btn" title="Insert Emoji">
+                            <i class="far fa-smile"></i>
+                        </button>
+                        <div class="input-container">
+                            <textarea id="message-input" placeholder="Type a message..." rows="1"></textarea>
+                        </div>
+                        <button class="input-action-btn" id="attach-btn" title="Attach File (coming soon)">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button id="send-message" class="btn send-btn" title="Send Message">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
                 </div>
-                <button id="send-message" class="btn send-btn" title="Send Message">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+                
+                <!-- Emoji Picker Panel (Hidden by default) -->
+                <div class="emoji-picker">
+                    <div class="emoji-picker-header">
+                        <h4>Emojis</h4>
+                        <button id="close-emoji" class="close-btn"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="emoji-categories">
+                        <button class="emoji-category active" data-category="recent"><i class="fas fa-clock"></i></button>
+                        <button class="emoji-category" data-category="smileys"><i class="fas fa-smile"></i></button>
+                        <button class="emoji-category" data-category="people"><i class="fas fa-user"></i></button>
+                        <button class="emoji-category" data-category="animals"><i class="fas fa-paw"></i></button>
+                        <button class="emoji-category" data-category="food"><i class="fas fa-utensils"></i></button>
+                        <button class="emoji-category" data-category="activities"><i class="fas fa-futbol"></i></button>
+                        <button class="emoji-category" data-category="travel"><i class="fas fa-car"></i></button>
+                        <button class="emoji-category" data-category="objects"><i class="fas fa-lightbulb"></i></button>
+                        <button class="emoji-category" data-category="symbols"><i class="fas fa-heart"></i></button>
+                    </div>
+                    <div class="emoji-container">
+                        <!-- Emojis will be loaded dynamically -->
+                        <div class="emoji-group" data-category="recent">
+                            <span class="emoji-char" data-emoji="😀">😀</span>
+                            <span class="emoji-char" data-emoji="👍">👍</span>
+                            <span class="emoji-char" data-emoji="👋">👋</span>
+                            <span class="emoji-char" data-emoji="😊">😊</span>
+                            <span class="emoji-char" data-emoji="🙂">🙂</span>
+                        </div>
+                        <!-- Other emoji categories will be added via JavaScript -->
+                    </div>
+                </div>
             </div>
         </div>
         

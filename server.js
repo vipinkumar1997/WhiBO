@@ -106,7 +106,7 @@ io.on('connection', (socket) => {
     
     // User wants to find a match
     socket.on('find match', () => {
-        console.log(`${socket.id} is looking for a match`);
+        console.log(`${socket.id} is looking for a match. Current queue length: ${waitingQueue.length}`);
         
         // Update user status
         const userData = users.get(socket.id);
@@ -120,67 +120,90 @@ io.on('connection', (socket) => {
         
         // Check if there's already someone in the queue
         if (waitingQueue.length > 0) {
-            const partnerId = waitingQueue.shift();
+            // Choose a random user from the queue for better matching experience
+            const randomIndex = Math.floor(Math.random() * waitingQueue.length);
+            const partnerId = waitingQueue[randomIndex];
+            
+            // Remove the chosen partner from the queue
+            waitingQueue = waitingQueue.filter(id => id !== partnerId);
+            
             const partnerSocket = io.sockets.sockets.get(partnerId);
             
             // Make sure partner is still connected
             if (partnerSocket) {
                 console.log(`Matched: ${socket.id} and ${partnerId}`);
                 
-                // Generate a unique chat ID
-                const chatId = generateChatId();
-                
-                // Establish the connection between the two users
-                chatPairs.set(socket.id, partnerId);
-                chatPairs.set(partnerId, socket.id);
-                
-                // Update user data
-                const userData = users.get(socket.id);
-                const partnerData = users.get(partnerId);
-                
-                if (userData) {
-                    userData.status = 'chatting';
-                    userData.partner = partnerId;
-                    userData.chatId = chatId;
-                    users.set(socket.id, userData);
+                try {
+                    // Generate a unique chat ID
+                    const chatId = generateChatId();
+                    
+                    // Establish the connection between the two users
+                    chatPairs.set(socket.id, partnerId);
+                    chatPairs.set(partnerId, socket.id);
+                    
+                    // Update user data
+                    const userData = users.get(socket.id);
+                    const partnerData = users.get(partnerId);
+                    
+                    if (userData) {
+                        userData.status = 'chatting';
+                        userData.partner = partnerId;
+                        userData.chatId = chatId;
+                        users.set(socket.id, userData);
+                    }
+                    
+                    if (partnerData) {
+                        partnerData.status = 'chatting';
+                        partnerData.partner = socket.id;
+                        partnerData.chatId = chatId;
+                        users.set(partnerId, partnerData);
+                    }
+                    
+                    // Increment active chats
+                    stats.activeChats++;
+                    
+                    // Create new chat log
+                    const chatLog = {
+                        id: chatId,
+                        user1: socket.id,
+                        user2: partnerId,
+                        startTime: Date.now(),
+                        endTime: null,
+                        duration: 0,
+                        messageCount: 0,
+                        status: 'active'
+                    };
+                    stats.chatLogs.push(chatLog);
+                    
+                    // Notify both users
+                    socket.emit('matched');
+                    partnerSocket.emit('matched');
+                    
+                    console.log(`Match notification sent to ${socket.id} and ${partnerId}`);
+                    
+                    // Update admin clients
+                    emitAdminUpdates();
+                } catch (error) {
+                    console.error("Error in matching process:", error);
+                    // Add user back to queue if there was an error
+                    waitingQueue.push(socket.id);
                 }
-                
-                if (partnerData) {
-                    partnerData.status = 'chatting';
-                    partnerData.partner = socket.id;
-                    partnerData.chatId = chatId;
-                    users.set(partnerId, partnerData);
-                }
-                
-                // Increment active chats
-                stats.activeChats++;
-                
-                // Create new chat log
-                const chatLog = {
-                    id: chatId,
-                    user1: socket.id,
-                    user2: partnerId,
-                    startTime: Date.now(),
-                    endTime: null,
-                    duration: 0,
-                    messageCount: 0,
-                    status: 'active'
-                };
-                stats.chatLogs.push(chatLog);
-                
-                // Notify both users
-                socket.emit('matched');
-                partnerSocket.emit('matched');
-                
-                // Update admin clients
-                emitAdminUpdates();
             } else {
-                // If partner disconnected while in queue, try again
+                console.log(`Partner ${partnerId} is no longer connected. Adding ${socket.id} back to queue.`);
+                // If partner disconnected while in queue, try again with next user
                 waitingQueue.push(socket.id);
+                // Remove the disconnected user from the queue
+                waitingQueue = waitingQueue.filter(id => id !== partnerId);
+                
+                // Try to match immediately with another user
+                if (waitingQueue.length > 1) {
+                    socket.emit('find match');
+                }
             }
         } else {
             // No one in the queue, add this user
             waitingQueue.push(socket.id);
+            console.log(`${socket.id} added to waiting queue. Queue length now: ${waitingQueue.length}`);
         }
     });
     

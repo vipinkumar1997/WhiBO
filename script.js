@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Enhanced Socket.io connection with better error handling and debugging
+    // Socket.io connection with optimized settings
     const socket = io({
         reconnection: true,
         reconnectionAttempts: 5,
@@ -7,49 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
         reconnectionDelayMax: 5000,
         timeout: 20000,
         transports: ['websocket', 'polling']
-    });
-    
-    // Socket connection event handlers with detailed logging
-    socket.on('connect', () => {
-        console.log('✅ Connected to chat server with ID:', socket.id);
-        showToast('Connected to server!', 'success');
-    });
-    
-    socket.on('connect_error', (error) => {
-        console.error('❌ Connection error:', error);
-        showToast('Could not connect to server. Please check your internet connection.', 'error');
-    });
-    
-    socket.on('disconnect', (reason) => {
-        console.log('❌ Disconnected from server:', reason);
-        // If we were searching, reset the search UI
-        if (isSearching) {
-            isSearching = false;
-            showScreen(welcomeScreen);
-            showToast('Disconnected from server. Please try again.', 'error');
-        }
-    });
-    
-    socket.on('reconnect', (attemptNumber) => {
-        console.log('✅ Reconnected to server after', attemptNumber, 'attempts');
-        showToast('Reconnected to server!', 'success');
-    });
-    
-    socket.on('reconnect_failed', () => {
-        console.error('❌ Failed to reconnect to server after multiple attempts');
-        showToast('Could not reconnect to server. Please reload the page.', 'error');
-    });
-    
-    // Add handler for queue position updates
-    socket.on('queue_position', (data) => {
-        console.log(`📊 Queue position update: ${data.position}`);
-        updateQueueDisplay(data.position);
-    });
-    
-    // Add handler for queue count updates
-    socket.on('queue_update', (data) => {
-        console.log(`📊 Queue size update: ${data.count} users waiting`);
-        updateQueueDisplay(null, data.count);
     });
     
     // DOM Elements
@@ -65,24 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const typingIndicator = document.getElementById('typing-indicator');
     const statusText = document.querySelector('.status-text');
     const newTopicBtn = document.getElementById('new-topic-btn');
-    const themeSwitch = document.getElementById('theme-switch');
-    const progressBar = document.querySelector('.search-progress-bar');
-    
-    // New UI Elements - Enhanced
-    const toggleSidebarBtn = document.getElementById('toggle-sidebar');
-    const chatSidebar = document.querySelector('.chat-sidebar');
     const emojiBtn = document.getElementById('emoji-btn');
-    const toggleEmojiBtn = document.getElementById('toggle-emoji-btn');
-    const emojiPicker = document.querySelector('.emoji-picker');
-    const closeEmojiBtn = document.getElementById('close-emoji');
-    const emojiCategories = document.querySelectorAll('.emoji-category');
-    const emojiChars = document.querySelectorAll('.emoji-char');
-    const attachBtn = document.getElementById('attach-btn');
     
-    // Modern UI Elements
-    const appContainer = document.querySelector('.app-container');
-    const bgElements = document.querySelector('.bg-elements');
-
     // Chat topics for suggestions
     const chatTopics = [
         "What's your favorite hobby?",
@@ -101,365 +42,306 @@ document.addEventListener('DOMContentLoaded', () => {
     let chatActive = false;
     let typingTimeout;
     let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    let isAndroid = /Android/.test(navigator.userAgent);
-    let isMobile = isIOS || isAndroid || window.innerWidth <= 768;
-    let isKeyboardVisible = false;
-    let lastMessageDate = null;
-    let userNickname = localStorage.getItem('whibo-nickname') || generateRandomNickname();
-    let userSettings = loadUserSettings();
     
-    // New state variables
-    let isSidebarVisible = window.innerWidth > 768; // Default visible on desktop
-    let isEmojiPickerVisible = false;
-
-    // New UI state variables
-    let animationsEnabled = true;
-    let particlesInitialized = false;
-    let confettiActive = false;
-    let isSearching = false;
-    
-    // User Dashboard Variables
-    const userDashboard = document.getElementById('user-dashboard');
-    const dashboardTabs = document.querySelectorAll('.nav-item');
-    const dashboardTabContents = document.querySelectorAll('.dashboard-tab');
-    const backToChatBtn = document.getElementById('back-to-chat');
-    const editNicknameButton = document.getElementById('edit-nickname-btn');
-    const editBioButton = document.getElementById('edit-bio-btn');
-    const avatarOptions = document.querySelectorAll('.avatar-option');
-    const themeOptions = document.querySelectorAll('.theme-option');
-    const bgOptions = document.querySelectorAll('.bg-option');
-    const userNicknameElements = document.querySelectorAll('.user-nickname, .nickname-value');
-    const settingsInputs = {
-        notificationSound: document.getElementById('notification-sound'),
-        autoScroll: document.getElementById('auto-scroll'),
-        fontSize: document.getElementById('font-size'),
-        blockImages: document.getElementById('block-images')
-    };
-
-    // User Dashboard Statistics
-    let userStats = {
-        totalChats: 0,
-        messagesSent: 0,
-        timeSpent: 0,
-        peopleMet: 0
-    };
-
-    // User Profile Data
-    let userProfile = {
-        nickname: userNickname,
-        bio: 'Tell others about yourself...',
-        avatarStyle: 'user-circle',
-        theme: 'default',
-        background: 'default'
-    };
-
-    // Load user settings from localStorage
-    function loadUserSettings() {
-        const defaultSettings = {
-            notificationSound: true,
-            autoScroll: true,
-            fontSize: 'medium'
-        };
-        
-        try {
-            const savedSettings = localStorage.getItem('whibo-settings');
-            return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
-        } catch (e) {
-            console.error('Error loading settings:', e);
-            return defaultSettings;
-        }
-    }
-    
-    // Save user settings to localStorage
-    function saveUserSettings() {
-        try {
-            localStorage.setItem('whibo-settings', JSON.stringify(userSettings));
-            applyUserSettings();
-        } catch (e) {
-            console.error('Error saving settings:', e);
-        }
-    }
-    
-    // Apply settings to the UI
-    function applyUserSettings() {
-        // Apply font size
-        document.documentElement.setAttribute('data-font-size', userSettings.fontSize);
-    }
-    
-    // Generate a random nickname
-    function generateRandomNickname() {
-        const adjectives = ['Happy', 'Curious', 'Clever', 'Bright', 'Friendly', 'Gentle', 'Kind', 'Brave', 'Calm', 'Witty'];
-        const nouns = ['Panda', 'Fox', 'Wolf', 'Eagle', 'Dolphin', 'Tiger', 'Lion', 'Hawk', 'Bear', 'Owl'];
-        
-        const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-        const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-        const randomNumber = Math.floor(Math.random() * 100);
-        
-        return `${randomAdjective}${randomNoun}${randomNumber}`;
-    }
-    
-    // Helper function to show a screen
+    // Functions to switch between screens
     function showScreen(screen) {
-        // Hide all screens
-        welcomeScreen.classList.remove('active');
-        waitingScreen.classList.remove('active');
-        if (chatScreen) chatScreen.classList.remove('active');
-        if (userDashboard) userDashboard.classList.remove('active');
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        screen.classList.add('active');
         
-        // Show the requested screen
-        if (screen) {
-            screen.classList.add('active');
-            
-            // Add entry animations based on screen type
-            if (screen === welcomeScreen) {
-                animateWelcomeScreen();
-            } else if (screen === waitingScreen) {
-                initParticles();
-                startPulseAnimation();
-                startProgressAnimation();
-            } else if (screen === chatScreen) {
-                // Ensure chat screen is fully initialized with flex display before showing
-                chatScreen.style.display = 'flex';
-                
-                // Reset sidebar visibility based on screen size
-                if (chatSidebar) {
-                    isSidebarVisible = window.innerWidth > 768;
-                    chatSidebar.style.transform = isSidebarVisible ? 'translateX(0)' : 'translateX(-100%)';
-                    if (isSidebarVisible) {
-                        chatSidebar.classList.add('visible');
-                    } else {
-                        chatSidebar.classList.remove('visible');
-                    }
-                }
-                
-                // Force a reflow to ensure the display change takes effect
-                void chatScreen.offsetWidth;
-                
-                // Add animation class for smoother transition
-                chatScreen.classList.add('animated-entry');
-                setTimeout(() => {
-                    chatScreen.classList.remove('animated-entry');
-                }, 500);
-                
-                // Set focus to input after transition
-                setTimeout(() => {
-                    if (messageInput) messageInput.focus();
-                }, 300);
-            }
-        }
-    }
-
-    // Start progress animation for the waiting screen
-    function startProgressAnimation() {
-        if (!progressBar) return;
-        
-        // Reset progress
-        progressBar.style.width = '0%';
-        
-        // Animate to 90% over 10 seconds (will hold there until matched or cancelled)
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-            if (!isSearching) {
-                clearInterval(progressInterval);
-                return;
-            }
-            
-            if (progress < 90) {
-                progress += 1;
-                progressBar.style.width = progress + '%';
-            }
-        }, 100);
-    }
-    
-    // Update the waiting screen with queue information
-    function updateQueueDisplay(position, count) {
-        const statusElement = document.querySelector('#waiting-screen .status-text');
-        if (!statusElement) return;
-        
-        if (position) {
-            statusElement.textContent = `You are #${position} in the queue`;
-        } else if (count !== undefined) {
-            // Only update if we're still on the waiting screen
-            if (waitingScreen.classList.contains('active') && isSearching) {
-                if (count === 0) {
-                    statusElement.textContent = `Waiting for other users to join...`;
-                } else {
-                    statusElement.textContent = `${count} ${count === 1 ? 'person' : 'people'} waiting for a chat`;
-                }
-            }
+        // Reset scroll position
+        if (screen === chatScreen) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        } else {
+            window.scrollTo(0, 0);
         }
     }
     
-    // Add a "debug mode" function that can be called from the browser console
-    window.debugWhiBO = function() {
-        console.log('💬 WhiBO Debug Info:');
-        console.log('Socket connected:', socket.connected);
-        console.log('Socket ID:', socket.id);
-        console.log('Searching status:', isSearching);
-        console.log('Chat active:', chatActive);
+    // Add a message to chat
+    function addMessage(message, isSelf) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        messageElement.classList.add(isSelf ? 'self' : 'stranger');
+        messageElement.textContent = message;
+        chatMessages.appendChild(messageElement);
         
-        // Try to reconnect if not connected
-        if (!socket.connected) {
-            console.log('Attempting to reconnect...');
-            socket.connect();
-        }
-        
-        return {
-            connected: socket.connected,
-            socketId: socket.id,
-            searching: isSearching,
-            chatActive: chatActive
-        };
-    };
+        // Smooth scroll to bottom
+        smoothScrollToBottom();
+    }
     
-    // Event listeners with enhanced connection checks
-    if (startChatBtn) {
-        startChatBtn.addEventListener('click', () => {
-            if (!socket.connected) {
-                console.log('⚠️ Socket not connected, attempting to connect...');
-                // Try to reconnect if not connected
-                socket.connect();
-                showToast('Connecting to server...', 'info');
-                
-                // Wait for connection before proceeding
-                socket.once('connect', () => {
-                    startChatSearch();
-                });
-                
-                return;
+    function smoothScrollToBottom() {
+        const target = chatMessages.scrollHeight;
+        const duration = 300;
+        const startTime = performance.now();
+        const startPos = chatMessages.scrollTop;
+        const distance = target - startPos;
+        
+        function scrollAnimation(currentTime) {
+            const elapsedTime = currentTime - startTime;
+            if (elapsedTime < duration) {
+                chatMessages.scrollTop = easeInOutCubic(elapsedTime, startPos, distance, duration);
+                requestAnimationFrame(scrollAnimation);
+            } else {
+                chatMessages.scrollTop = target;
             }
-            
-            startChatSearch();
-        });
+        }
+        
+        // Easing function for smooth scrolling
+        function easeInOutCubic(t, b, c, d) {
+            t /= d/2;
+            if (t < 1) return c/2*t*t*t + b;
+            t -= 2;
+            return c/2*(t*t*t + 2) + b;
+        }
+        
+        requestAnimationFrame(scrollAnimation);
     }
     
-    // Function to start chat search with error handling
-    function startChatSearch() {
-        // Update search status
-        isSearching = true;
+    // Add system message
+    function addSystemMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', 'system');
+        messageElement.textContent = message;
+        chatMessages.appendChild(messageElement);
         
-        // Show the waiting screen
-        showScreen(waitingScreen);
-        
-        // Tell the server to find a match with error handling
-        try {
-            console.log('🔍 Finding match...');
-            socket.emit('find match');
+        // Smooth scroll to bottom
+        smoothScrollToBottom();
+    }
+    
+    // Fix for iOS viewport height issue
+    function fixIOSViewportHeight() {
+        if (isIOS) {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
             
-            // Show toast notification
-            showToast('Looking for someone to chat with...', 'info');
-            
-            // Add visual feedback
-            addRippleEffect(startChatBtn);
-            
-            // Add timeout for long searches
-            setTimeout(() => {
-                if (isSearching) {
-                    console.log('⏱️ Search taking longer than expected...');
-                    showToast('Still searching... Please wait a moment.', 'info');
-                }
-            }, 15000); // Show after 15 seconds of searching
-        } catch (error) {
-            console.error('❌ Error sending find match:', error);
-            showToast('Error connecting to chat service. Please try again.', 'error');
-            isSearching = false;
-            showScreen(welcomeScreen);
+            // Apply the height to the container
+            document.querySelector('.container').style.height = `calc(var(--vh, 1vh) * 100)`;
+            document.querySelector('.container').style.maxHeight = `calc(var(--vh, 1vh) * 100)`;
         }
     }
     
-    // Add ripple effect to buttons
-    function addRippleEffect(button) {
-        if (!button) return;
-        
-        const ripple = document.createElement('span');
-        ripple.className = 'ripple';
-        button.appendChild(ripple);
-        
-        const rect = button.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        
-        ripple.style.width = ripple.style.height = `${size}px`;
-        ripple.style.left = '50%';
-        ripple.style.top = '50%';
-        ripple.style.transform = 'translate(-50%, -50%) scale(0)';
-        
-        // Start animation
-        setTimeout(() => {
-            ripple.style.transform = 'translate(-50%, -50%) scale(1)';
-            ripple.style.opacity = '0';
-        }, 10);
-        
-        // Clean up
-        setTimeout(() => {
-            ripple.remove();
-        }, 500);
-    }
+    // Initialize iOS viewport fix
+    fixIOSViewportHeight();
     
-    // Existing event listeners with better logging
-    if (cancelSearchBtn) {
-        cancelSearchBtn.addEventListener('click', () => {
-            console.log('🛑 Search cancelled by user');
-            // Update search status
-            isSearching = false;
-            
-            // Tell the server to cancel the search
-            socket.emit('cancel search');
-            
-            // Return to welcome screen
-            showScreen(welcomeScreen);
-            
-            // Add ripple effect
-            addRippleEffect(cancelSearchBtn);
-            
-            // Show toast notification
-            showToast('Search cancelled', 'info');
-        });
-    }
-
-    // Socket events with enhanced logging
+    // Update on resize
+    window.addEventListener('resize', () => {
+        fixIOSViewportHeight();
+        
+        // Reset textarea height
+        messageInput.style.height = 'auto';
+    });
+    
+    // Add reconnection handling for Render.com
+    socket.on('reconnect_attempt', () => {
+        console.log('Attempting to reconnect...');
+        // Show reconnection message if in chat
+        if (chatScreen.classList.contains('active')) {
+            addSystemMessage('Connection lost. Attempting to reconnect...');
+        }
+    });
+    
+    socket.on('reconnect', () => {
+        console.log('Reconnected to server');
+        if (chatScreen.classList.contains('active')) {
+            addSystemMessage('Reconnected!');
+        }
+    });
+    
+    socket.on('reconnect_error', () => {
+        console.log('Reconnection error');
+        if (chatScreen.classList.contains('active')) {
+            addSystemMessage('Failed to reconnect. Please refresh the page.');
+        }
+    });
+    
+    // Socket events
+    socket.on('connect', () => {
+        console.log('Connected to server');
+    });
+    
     socket.on('matched', () => {
-        console.log('✅ Matched with stranger!');
-        
-        // Update search status
-        isSearching = false;
         chatActive = true;
+        showScreen(chatScreen);
+        statusText.textContent = 'Chatting with a stranger';
         
-        // Show chat screen
-        if (chatScreen) {
-            // First ensure the display property is set before showing the screen
-            chatScreen.style.display = 'flex';
-            // Force a reflow to ensure the display change takes effect
-            void chatScreen.offsetWidth;
-            // Then activate the screen
-            showScreen(chatScreen);
+        // Update end chat button for mobile
+        if (window.innerWidth <= 768) {
+            endChatBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+        } else {
+            endChatBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> <span class="btn-text">End Chat</span>';
         }
         
-        if (statusText) statusText.textContent = 'Connected with Stranger';
-        
-        const statusDot = document.querySelector('.status-dot');
-        if (statusDot) statusDot.style.backgroundColor = 'var(--success)';
-        
-        if (endChatBtn) {
-            endChatBtn.innerHTML = '<i class="fas fa-door-open"></i><span>End Chat</span>';
-        }
-        
-        if (chatMessages) chatMessages.innerHTML = '';
-        lastMessageDate = null;
+        // Clear previous messages if any
+        chatMessages.innerHTML = '';
         addSystemMessage('You are now connected with a stranger');
         
-        socket.emit('set nickname', userNickname);
-        
+        // Focus on input field
         setTimeout(() => {
-            if (messageInput) messageInput.focus();
-            
-            // Add celebration effect
-            createConfetti();
-            
-            // Show welcome toast
-            showToast('Connected! Start chatting now!', 'success');
+            messageInput.focus();
         }, 300);
     });
     
-    // Rest of your code remains unchanged
-    // ...existing code...
+    socket.on('chat message', (message) => {
+        addMessage(message, false);
+        typingIndicator.style.display = 'none';
+    });
+    
+    socket.on('typing', () => {
+        typingIndicator.style.display = 'flex';
+        
+        // Scroll to show typing indicator
+        smoothScrollToBottom();
+    });
+    
+    socket.on('stop typing', () => {
+        typingIndicator.style.display = 'none';
+    });
+    
+    socket.on('stranger disconnected', () => {
+        if (chatActive) {
+            addSystemMessage('Stranger has disconnected');
+            statusText.textContent = 'Disconnected';
+            document.querySelector('.status-dot').style.backgroundColor = '#ff4d4d';
+            
+            if (window.innerWidth <= 768) {
+                endChatBtn.innerHTML = '<i class="fas fa-redo"></i>';
+            } else {
+                endChatBtn.innerHTML = '<i class="fas fa-redo"></i> <span class="btn-text">New Chat</span>';
+            }
+            
+            chatActive = false;
+        }
+    });
+    
+    // Button click events
+    startChatBtn.addEventListener('click', () => {
+        showScreen(waitingScreen);
+        socket.emit('find match');
+    });
+    
+    cancelSearchBtn.addEventListener('click', () => {
+        socket.emit('cancel search');
+        showScreen(welcomeScreen);
+    });
+    
+    endChatBtn.addEventListener('click', () => {
+        if (chatActive) {
+            socket.emit('end chat');
+            chatActive = false;
+            statusText.textContent = 'Disconnected';
+            document.querySelector('.status-dot').style.backgroundColor = '#ff4d4d';
+            
+            if (window.innerWidth <= 768) {
+                endChatBtn.innerHTML = '<i class="fas fa-redo"></i>';
+            } else {
+                endChatBtn.innerHTML = '<i class="fas fa-redo"></i> <span class="btn-text">New Chat</span>';
+            }
+            
+            addSystemMessage('You disconnected');
+        } else {
+            // Clear chat history
+            chatMessages.innerHTML = '';
+            
+            if (window.innerWidth <= 768) {
+                endChatBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+            } else {
+                endChatBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> <span class="btn-text">End Chat</span>';
+            }
+            
+            statusText.textContent = 'Finding a new stranger...';
+            document.querySelector('.status-dot').style.backgroundColor = '#4caf50';
+            showScreen(waitingScreen);
+            socket.emit('find match');
+        }
+    });
+    
+    sendMessageBtn.addEventListener('click', sendMessage);
+    
+    // Prevent textarea from capturing Enter key for form submission
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+        
+        // Emit typing event
+        if (chatActive) {
+            socket.emit('typing');
+            
+            // Clear previous timeout
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit('stop typing');
+            }, 1000);
+        }
+    });
+    
+    // Auto-resize textarea as user types
+    messageInput.addEventListener('input', function() {
+        // Reset height to auto to correctly calculate new height
+        this.style.height = 'auto';
+        
+        // Set the new height based on scroll height (max 100px)
+        const newHeight = Math.min(this.scrollHeight, 100);
+        this.style.height = newHeight + 'px';
+    });
+    
+    function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message && chatActive) {
+            socket.emit('chat message', message);
+            socket.emit('stop typing');
+            addMessage(message, true);
+            messageInput.value = '';
+            
+            // Reset textarea height
+            messageInput.style.height = 'auto';
+            
+            // Focus back on input
+            messageInput.focus();
+        }
+    }
+    
+    // New Topic button functionality
+    if (newTopicBtn) {
+        newTopicBtn.addEventListener('click', () => {
+            if (chatActive) {
+                const randomTopic = chatTopics[Math.floor(Math.random() * chatTopics.length)];
+                messageInput.value = randomTopic;
+                messageInput.focus();
+            }
+        });
+    }
+    
+    // Emoji button (placeholder functionality)
+    if (emojiBtn) {
+        emojiBtn.addEventListener('click', () => {
+            // Simple emoji insertion for demo purposes
+            const emojis = ['😊', '👋', '👍', '❤️', '😂', '🙌', '🎉', '🤔', '😎', '🔥'];
+            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+            messageInput.value += randomEmoji;
+            messageInput.focus();
+        });
+    }
+    
+    // Handle mobile keyboard adjustments
+    if ('virtualKeyboard' in navigator) {
+        navigator.virtualKeyboard.overlaysContent = true;
+    }
+    
+    // Handle visibility change
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && chatActive) {
+            // Notify server that user is active again if needed
+        }
+    });
+    
+    // Prevent zooming on double tap for touch devices
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        if (now - lastTouchEnd < 300) {
+            e.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
 });

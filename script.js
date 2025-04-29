@@ -45,8 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Functions to switch between screens
     function showScreen(screen) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => {
+            s.classList.remove('active');
+            s.classList.add('hidden');
+        });
         screen.classList.add('active');
+        screen.classList.remove('hidden');
         
         // Reset scroll position
         if (screen === chatScreen) {
@@ -214,8 +218,24 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Button click events
     startChatBtn.addEventListener('click', () => {
+        console.log("Start chat button clicked, finding match...");
         showScreen(waitingScreen);
         socket.emit('find match');
+        
+        // Add progress bar animation
+        const progressBar = document.querySelector('.search-progress-bar');
+        if (progressBar) {
+            progressBar.style.width = '0%';
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                } else {
+                    width++;
+                    progressBar.style.width = width + '%';
+                }
+            }, 100);
+        }
     });
     
     cancelSearchBtn.addEventListener('click', () => {

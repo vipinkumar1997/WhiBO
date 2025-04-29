@@ -327,55 +327,86 @@
                         </div>
                     </div>
                     
-                    <!-- Chat input area with modern responsive design -->
-                    <div class="sticky bottom-0 z-10 bg-white dark:bg-slate-800 shadow-lg rounded-t-xl md:rounded-lg mx-auto w-full max-w-4xl px-3 py-3 md:px-4 md:py-4 border-t border-slate-100 dark:border-slate-700 transform transition-all duration-200">
+                    <!-- Modern Chat Input Area with Advanced Animations -->
+                    <div class="sticky bottom-0 z-10 bg-white/80 dark:bg-slate-800/90 backdrop-blur-lg shadow-lg rounded-t-xl md:rounded-xl mx-auto w-full max-w-4xl px-3 py-3 md:px-4 md:py-4 border border-slate-100/50 dark:border-slate-700/50 transform transition-all duration-300 hover:shadow-xl animate-fade-in">
                         <div class="flex items-center gap-2 md:gap-3">
-                            <!-- Emoji button -->
-                            <button id="emoji-btn" class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-primary-500 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30" title="Insert Emoji">
-                                <i class="far fa-smile text-xl"></i>
+                            <!-- Emoji button with pulse animation -->
+                            <button id="emoji-btn" class="emoji-btn flex-shrink-0 w-11 h-11 md:w-12 md:h-12 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-300 transition-all duration-300 hover:scale-110 hover:rotate-12 hover:text-primary-500 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 active:scale-95" title="Insert Emoji">
+                                <i class="far fa-smile text-xl animate-pulse-slow"></i>
                             </button>
                             
-                            <!-- Text input field -->
-                            <div class="relative flex-1 bg-slate-100 dark:bg-slate-700 rounded-2xl overflow-hidden transition-all duration-200 focus-within:ring-2 focus-within:ring-primary-500/30">
-                                <textarea id="message-input" class="block w-full bg-transparent px-4 py-3 max-h-32 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none focus:outline-none" placeholder="Type a message..." rows="1"></textarea>
+                            <!-- Text input field with animated focus effect -->
+                            <div class="message-input-container relative flex-1 bg-slate-100 dark:bg-slate-700 rounded-2xl overflow-hidden transition-all duration-300 focus-within:ring-2 focus-within:ring-primary-500/50 focus-within:scale-[1.02] group hover:shadow-md">
+                                <textarea id="message-input" class="block w-full bg-transparent px-4 py-3 max-h-32 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none focus:outline-none transition-all" placeholder="Type a message..." rows="1"></textarea>
+                                <div class="input-animation absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-primary-500 via-purple-500 to-primary-400 w-0 group-focus-within:w-full transition-all duration-700 ease-out"></div>
                             </div>
                             
-                            <!-- Attachment button -->
-                            <button id="attach-btn" class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-primary-500 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30" title="Attach File">
-                                <i class="fas fa-paperclip text-xl"></i>
+                            <!-- Attachment button with bouncing animation -->
+                            <button id="attach-btn" class="attach-btn flex-shrink-0 w-11 h-11 md:w-12 md:h-12 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-300 transition-all duration-300 hover:scale-110 hover:rotate-12 hover:text-primary-500 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 active:scale-95" title="Attach File">
+                                <i class="fas fa-paperclip text-xl hover:animate-bounce"></i>
                             </button>
                             
-                            <!-- Send button -->
-                            <button id="send-message" class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-primary-600 to-primary-500 rounded-full flex items-center justify-center text-white shadow-md transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:from-primary-500 hover:to-primary-400 active:translate-y-0 active:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500/50" title="Send Message">
-                                <i class="fas fa-paper-plane text-xl"></i>
+                            <!-- Send button with ripple effect -->
+                            <button id="send-message" class="send-btn flex-shrink-0 w-11 h-11 md:w-12 md:h-12 relative bg-gradient-to-r from-primary-600 to-primary-400 hover:from-primary-500 hover:to-purple-400 rounded-full flex items-center justify-center text-white shadow-lg shadow-primary-500/20 transition-all duration-300 hover:scale-110 hover:rotate-6 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary-500/50 overflow-hidden" title="Send Message">
+                                <i class="fas fa-paper-plane text-xl z-10"></i>
+                                <span class="send-btn-ripple absolute w-0 h-0 rounded-full bg-white/30 transform origin-center transition-all duration-500"></span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Emoji Picker Panel (Hidden by default) -->
-                    <div class="emoji-picker hidden absolute bottom-20 right-4 md:right-8 w-[280px] sm:w-[320px] h-[300px] bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 z-50">
-                        <div class="flex justify-between items-center px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-                            <h4 class="font-medium text-slate-800 dark:text-slate-200">Emojis</h4>
-                            <button id="close-emoji" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <!-- Emoji Picker Panel with Animation (Hidden by default) -->
+                    <div class="emoji-picker hidden animate-slide-up absolute bottom-20 right-4 md:right-8 w-[300px] sm:w-[340px] h-[320px] bg-white/90 dark:bg-slate-800/95 backdrop-blur-md rounded-xl shadow-2xl border border-slate-200/70 dark:border-slate-700/70 z-50 transform transition-all duration-300 scale-95 opacity-0">
+                        <div class="flex justify-between items-center px-4 py-3 border-b border-slate-200/70 dark:border-slate-700/70">
+                            <h4 class="font-medium text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                                <span class="animate-bounce text-xl">😀</span> 
+                                <span>Express Yourself</span>
+                            </h4>
+                            <button id="close-emoji" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-300 hover:rotate-90">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
-                        <div class="flex gap-1 overflow-x-auto px-2 py-2 border-b border-slate-200 dark:border-slate-700 scrollbar-thin">
-                            <button class="emoji-category active p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700" data-category="recent">
+                        <div class="flex gap-1 overflow-x-auto px-2 py-2 border-b border-slate-200/70 dark:border-slate-700/70 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600">
+                            <button class="emoji-category active p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110" data-category="recent">
                                 <i class="fas fa-clock"></i>
                             </button>
-                            <!-- Other emoji categories will be added via JavaScript -->
+                            <button class="emoji-category p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110" data-category="smileys">
+                                <i class="far fa-smile"></i>
+                            </button>
+                            <button class="emoji-category p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110" data-category="people">
+                                <i class="far fa-hand-peace"></i>
+                            </button>
+                            <button class="emoji-category p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110" data-category="animals">
+                                <i class="fas fa-paw"></i>
+                            </button>
+                            <button class="emoji-category p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110" data-category="food">
+                                <i class="fas fa-pizza-slice"></i>
+                            </button>
+                            <button class="emoji-category p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110" data-category="travel">
+                                <i class="fas fa-plane"></i>
+                            </button>
+                            <button class="emoji-category p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110" data-category="symbols">
+                                <i class="fas fa-heart"></i>
+                            </button>
                         </div>
-                        <div class="p-2 overflow-y-auto h-[calc(300px-88px)] grid grid-cols-7 gap-1">
+                        <div class="p-2 overflow-y-auto h-[calc(320px-88px)] grid grid-cols-7 gap-1 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600">
                             <!-- Emojis will be loaded dynamically -->
-                            <div class="emoji-group" data-category="recent">
-                                <span class="emoji-char w-9 h-9 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer" data-emoji="😀">😀</span>
-                                <span class="emoji-char w-9 h-9 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer" data-emoji="👍">👍</span>
-                                <span class="emoji-char w-9 h-9 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer" data-emoji="👋">👋</span>
-                                <span class="emoji-char w-9 h-9 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer" data-emoji="😊">😊</span>
-                                <span class="emoji-char w-9 h-9 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer" data-emoji="🙂">🙂</span>
+                            <div class="emoji-group active" data-category="recent">
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="😀">😀</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="👍">👍</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="👋">👋</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="😊">😊</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="🙂">🙂</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="❤️">❤️</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="😂">😂</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="🔥">🔥</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="🎉">🎉</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="🤔">🤔</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="😎">😎</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="😍">😍</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="🙌">🙌</span>
+                                <span class="emoji-char w-10 h-10 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-all duration-200 hover:scale-125 hover:rotate-3" data-emoji="✨">✨</span>
                             </div>
-                            <!-- Other emoji categories will be added via JavaScript -->
+                            <!-- Other emoji categories can be loaded dynamically via JavaScript -->
                         </div>
                     </div>
                 </div>

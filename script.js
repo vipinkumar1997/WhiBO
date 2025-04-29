@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Socket.io connection with optimized settings
+    // Enhanced Socket.io connection with better error handling and debugging
     const socket = io({
         reconnection: true,
         reconnectionAttempts: 5,
@@ -7,6 +7,49 @@ document.addEventListener('DOMContentLoaded', () => {
         reconnectionDelayMax: 5000,
         timeout: 20000,
         transports: ['websocket', 'polling']
+    });
+    
+    // Socket connection event handlers with detailed logging
+    socket.on('connect', () => {
+        console.log('✅ Connected to chat server with ID:', socket.id);
+        showToast('Connected to server!', 'success');
+    });
+    
+    socket.on('connect_error', (error) => {
+        console.error('❌ Connection error:', error);
+        showToast('Could not connect to server. Please check your internet connection.', 'error');
+    });
+    
+    socket.on('disconnect', (reason) => {
+        console.log('❌ Disconnected from server:', reason);
+        // If we were searching, reset the search UI
+        if (isSearching) {
+            isSearching = false;
+            showScreen(welcomeScreen);
+            showToast('Disconnected from server. Please try again.', 'error');
+        }
+    });
+    
+    socket.on('reconnect', (attemptNumber) => {
+        console.log('✅ Reconnected to server after', attemptNumber, 'attempts');
+        showToast('Reconnected to server!', 'success');
+    });
+    
+    socket.on('reconnect_failed', () => {
+        console.error('❌ Failed to reconnect to server after multiple attempts');
+        showToast('Could not reconnect to server. Please reload the page.', 'error');
+    });
+    
+    // Add handler for queue position updates
+    socket.on('queue_position', (data) => {
+        console.log(`📊 Queue position update: ${data.position}`);
+        updateQueueDisplay(data.position);
+    });
+    
+    // Add handler for queue count updates
+    socket.on('queue_update', (data) => {
+        console.log(`📊 Queue size update: ${data.count} users waiting`);
+        updateQueueDisplay(null, data.count);
     });
     
     // DOM Elements
@@ -228,24 +271,100 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 100);
     }
     
-    // Event listeners with modern feedback
+    // Update the waiting screen with queue information
+    function updateQueueDisplay(position, count) {
+        const statusElement = document.querySelector('#waiting-screen .status-text');
+        if (!statusElement) return;
+        
+        if (position) {
+            statusElement.textContent = `You are #${position} in the queue`;
+        } else if (count !== undefined) {
+            // Only update if we're still on the waiting screen
+            if (waitingScreen.classList.contains('active') && isSearching) {
+                if (count === 0) {
+                    statusElement.textContent = `Waiting for other users to join...`;
+                } else {
+                    statusElement.textContent = `${count} ${count === 1 ? 'person' : 'people'} waiting for a chat`;
+                }
+            }
+        }
+    }
+    
+    // Add a "debug mode" function that can be called from the browser console
+    window.debugWhiBO = function() {
+        console.log('💬 WhiBO Debug Info:');
+        console.log('Socket connected:', socket.connected);
+        console.log('Socket ID:', socket.id);
+        console.log('Searching status:', isSearching);
+        console.log('Chat active:', chatActive);
+        
+        // Try to reconnect if not connected
+        if (!socket.connected) {
+            console.log('Attempting to reconnect...');
+            socket.connect();
+        }
+        
+        return {
+            connected: socket.connected,
+            socketId: socket.id,
+            searching: isSearching,
+            chatActive: chatActive
+        };
+    };
+    
+    // Event listeners with enhanced connection checks
     if (startChatBtn) {
         startChatBtn.addEventListener('click', () => {
-            // Update search status
-            isSearching = true;
+            if (!socket.connected) {
+                console.log('⚠️ Socket not connected, attempting to connect...');
+                // Try to reconnect if not connected
+                socket.connect();
+                showToast('Connecting to server...', 'info');
+                
+                // Wait for connection before proceeding
+                socket.once('connect', () => {
+                    startChatSearch();
+                });
+                
+                return;
+            }
             
-            // Show the waiting screen
-            showScreen(waitingScreen);
-            
-            // Tell the server to find a match
+            startChatSearch();
+        });
+    }
+    
+    // Function to start chat search with error handling
+    function startChatSearch() {
+        // Update search status
+        isSearching = true;
+        
+        // Show the waiting screen
+        showScreen(waitingScreen);
+        
+        // Tell the server to find a match with error handling
+        try {
+            console.log('🔍 Finding match...');
             socket.emit('find match');
-            
-            // Add modern ripple effect on click
-            addRippleEffect(startChatBtn);
             
             // Show toast notification
             showToast('Looking for someone to chat with...', 'info');
-        });
+            
+            // Add visual feedback
+            addRippleEffect(startChatBtn);
+            
+            // Add timeout for long searches
+            setTimeout(() => {
+                if (isSearching) {
+                    console.log('⏱️ Search taking longer than expected...');
+                    showToast('Still searching... Please wait a moment.', 'info');
+                }
+            }, 15000); // Show after 15 seconds of searching
+        } catch (error) {
+            console.error('❌ Error sending find match:', error);
+            showToast('Error connecting to chat service. Please try again.', 'error');
+            isSearching = false;
+            showScreen(welcomeScreen);
+        }
     }
     
     // Add ripple effect to buttons
@@ -276,9 +395,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
     }
     
-    // Existing event listeners with added modern visual feedback
+    // Existing event listeners with better logging
     if (cancelSearchBtn) {
         cancelSearchBtn.addEventListener('click', () => {
+            console.log('🛑 Search cancelled by user');
             // Update search status
             isSearching = false;
             
@@ -296,13 +416,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Socket events
-    socket.on('connect', () => {
-        console.log('Connected to server');
-        showToast('Connected to server!', 'success');
-    });
-    
+    // Socket events with enhanced logging
     socket.on('matched', () => {
+        console.log('✅ Matched with stranger!');
+        
         // Update search status
         isSearching = false;
         chatActive = true;

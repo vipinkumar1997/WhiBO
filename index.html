@@ -8,119 +8,244 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        },
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                        'heading': ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    },
+                },
+            },
+            plugins: [],
+        }
+    </script>
+    <!-- Custom styles to override Tailwind or add custom animations -->
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+        }
+        .chat-bubble-anim {
+            position: relative;
+            width: 100%;
+            height: 240px;
+        }
+        .chat-bubble {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            color: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation-duration: 3s;
+            animation-iteration-count: infinite;
+            animation-timing-function: ease-in-out;
+        }
+        .b1 {
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            left: 20%;
+            top: 20%;
+            animation-name: float-bubble-1;
+        }
+        .b2 {
+            background: linear-gradient(135deg, #ec4899, #f472b6);
+            left: 50%;
+            top: 10%;
+            animation-name: float-bubble-2;
+            animation-delay: 0.5s;
+        }
+        .b3 {
+            background: linear-gradient(135deg, #0891b2, #22d3ee);
+            right: 20%;
+            top: 30%;
+            animation-name: float-bubble-3;
+            animation-delay: 1s;
+        }
+        @keyframes float-bubble-1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-15px, -15px); }
+        }
+        @keyframes float-bubble-2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(5px, -20px); }
+        }
+        @keyframes float-bubble-3 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(15px, -10px); }
+        }
+        /* Ensure theme toggle works with custom styling */
+        #theme-switch:checked + .theme-toggle-label {
+            background-color: #1e1b4b;
+        }
+        #theme-switch:checked + .theme-toggle-label .toggle-circle {
+            transform: translateX(24px);
+            background-color: #6366f1;
+        }
+    </style>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <meta name="description" content="WhiBO - Chat with random strangers anonymously from around the world">
 </head>
-<body>
+<body class="font-sans bg-slate-50 dark:bg-slate-900 min-h-screen">
     <!-- Theme toggle switch -->
-    <div class="theme-toggle">
-        <input type="checkbox" id="theme-switch">
-        <label for="theme-switch" title="Toggle dark/light mode">
-            <i class="fas fa-moon"></i>
-            <i class="fas fa-sun"></i>
-            <span class="toggle-ball"></span>
+    <div class="fixed top-6 right-6 z-50">
+        <label for="theme-switch" class="relative inline-flex cursor-pointer items-center">
+            <input type="checkbox" id="theme-switch" class="sr-only peer">
+            <div class="theme-toggle-label h-7 w-14 rounded-full bg-slate-200 after:absolute after:left-[3px] after:top-[3px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all dark:bg-slate-700 peer-checked:after:translate-x-7 peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 peer-checked:bg-primary-600 peer-checked:after:bg-primary-400">
+                <span class="absolute left-2 top-1.5 text-xs text-slate-400 dark:text-slate-200">
+                    <i class="fas fa-moon"></i>
+                </span>
+                <span class="absolute right-2 top-1.5 text-xs text-slate-400 dark:text-slate-200">
+                    <i class="fas fa-sun"></i>
+                </span>
+            </div>
         </label>
     </div>
 
     <!-- Background elements -->
-    <div class="bg-elements">
-        <div class="bg-circle circle-1"></div>
-        <div class="bg-circle circle-2"></div>
-        <div class="bg-circle circle-3"></div>
+    <div class="fixed inset-0 overflow-hidden -z-10">
+        <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-primary-400/10 rounded-full blur-3xl transform translate-x-1/4 -translate-y-1/4"></div>
+        <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-pink-400/10 rounded-full blur-3xl transform -translate-x-1/4 translate-y-1/4"></div>
+        <div class="absolute top-1/2 left-1/3 w-1/3 h-1/3 bg-cyan-400/10 rounded-full blur-3xl"></div>
     </div>
 
-    <div class="app-container">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- App Header -->
-        <header>
-            <div class="brand">
-                <div class="logo">
-                    <div class="logo-inner">
-                        <i class="fas fa-comment-dots"></i>
-                    </div>
+        <header class="py-6 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center text-white shadow-lg shadow-primary-500/20">
+                    <i class="fas fa-comment-dots text-xl"></i>
                 </div>
-                <div class="brand-text">
-                    <h1>WhiBO</h1>
-                    <div class="tagline">Anonymous Chat</div>
+                <div>
+                    <h1 class="font-heading text-2xl font-bold bg-clip-text text-transparent bg-gradient-primary">WhiBO</h1>
+                    <div class="text-sm text-slate-600 dark:text-slate-300">Anonymous Chat</div>
                 </div>
             </div>
         </header>
         
         <!-- Welcome Screen -->
-        <div id="welcome-screen" class="screen active">
-            <div class="welcome-content">
-                <div class="hero">
-                    <div class="hero-illustration">
-                        <div class="chat-bubble-animation">
-                            <div class="chat-bubble b1"><i class="fas fa-smile"></i></div>
-                            <div class="chat-bubble b2"><i class="fas fa-globe"></i></div>
-                            <div class="chat-bubble b3"><i class="fas fa-lock"></i></div>
-                        </div>
+        <div id="welcome-screen" class="screen active py-10 sm:py-16">
+            <div class="max-w-4xl mx-auto">
+                <!-- Hero Section -->
+                <div class="text-center mb-16">
+                    <div class="chat-bubble-anim mb-8 mx-auto">
+                        <div class="chat-bubble b1 text-xl"><i class="fas fa-smile"></i></div>
+                        <div class="chat-bubble b2 text-xl"><i class="fas fa-globe"></i></div>
+                        <div class="chat-bubble b3 text-xl"><i class="fas fa-lock"></i></div>
                     </div>
-                    <h2>Talk to <span class="highlight">Strangers</span></h2>
-                    <p class="hero-text">Connect instantly with random people from around the world. Anonymous, secure, and free.</p>
+                    <h2 class="text-4xl sm:text-5xl font-heading font-bold mb-6 text-slate-800 dark:text-white">
+                        Talk to <span class="text-primary-600 dark:text-primary-400">Strangers</span>
+                    </h2>
+                    <p class="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+                        Connect instantly with random people from around the world. Anonymous, secure, and free.
+                    </p>
                 </div>
                 
-                <div class="features-grid">
-                    <div class="feature">
-                        <div class="feature-icon">
-                            <i class="fas fa-mask"></i>
+                <!-- Features Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                    <!-- Anonymous Feature -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/30 transform transition duration-300 hover:-translate-y-2">
+                        <div class="w-14 h-14 mb-4 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                            <i class="fas fa-mask text-2xl"></i>
                         </div>
-                        <h3>Anonymous</h3>
-                        <p>Chat without revealing your identity</p>
+                        <h3 class="text-xl font-heading font-semibold mb-2 text-slate-800 dark:text-white">Anonymous</h3>
+                        <p class="text-slate-600 dark:text-slate-300">Chat without revealing your identity</p>
                     </div>
-                    <div class="feature">
-                        <div class="feature-icon">
-                            <i class="fas fa-bolt"></i>
+                    
+                    <!-- Instant Feature -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/30 transform transition duration-300 hover:-translate-y-2">
+                        <div class="w-14 h-14 mb-4 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center text-pink-600 dark:text-pink-400">
+                            <i class="fas fa-bolt text-2xl"></i>
                         </div>
-                        <h3>Instant</h3>
-                        <p>Connect with someone in seconds</p>
+                        <h3 class="text-xl font-heading font-semibold mb-2 text-slate-800 dark:text-white">Instant</h3>
+                        <p class="text-slate-600 dark:text-slate-300">Connect with someone in seconds</p>
                     </div>
-                    <div class="feature">
-                        <div class="feature-icon">
-                            <i class="fas fa-shield-alt"></i>
+                    
+                    <!-- Secure Feature -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/30 transform transition duration-300 hover:-translate-y-2">
+                        <div class="w-14 h-14 mb-4 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                            <i class="fas fa-shield-alt text-2xl"></i>
                         </div>
-                        <h3>Secure</h3>
-                        <p>Your conversations stay private</p>
+                        <h3 class="text-xl font-heading font-semibold mb-2 text-slate-800 dark:text-white">Secure</h3>
+                        <p class="text-slate-600 dark:text-slate-300">Your conversations stay private</p>
                     </div>
                 </div>
                 
-                <div class="start-section">
-                    <button id="start-chat" class="btn primary-btn pulse">
-                        <span class="btn-icon"><i class="fas fa-comment-dots"></i></span>
-                        <span class="btn-text">Start Chatting Now</span>
+                <!-- Start Button Section -->
+                <div class="text-center">
+                    <button id="start-chat" class="inline-flex items-center gap-2 px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-full shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 hover:-translate-y-1 active:translate-y-0 transform transition-all duration-300 animate-pulse-slow">
+                        <i class="fas fa-comment-dots"></i>
+                        <span>Start Chatting Now</span>
                     </button>
                 </div>
             </div>
         </div>
         
         <!-- Waiting Screen -->
-        <div id="waiting-screen" class="screen">
-            <div class="waiting-content">
-                <div class="searching-animation">
-                    <div class="radar">
-                        <div class="radar-beam"></div>
-                        <div class="ping ping1"></div>
-                        <div class="ping ping2"></div>
-                        <div class="ping ping3"></div>
+        <div id="waiting-screen" class="screen hidden py-10">
+            <div class="max-w-md mx-auto text-center">
+                <div class="mb-8">
+                    <div class="w-40 h-40 mx-auto mb-6 relative border-4 border-primary-100 dark:border-primary-900/30 rounded-full">
+                        <div class="absolute inset-0 rounded-full border-t-4 border-primary-500 animate-spin"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-search text-4xl text-primary-500"></i>
+                        </div>
                     </div>
                 </div>
-                <h2>Finding Someone <span class="dots-loading"><span>.</span><span>.</span><span>.</span></span></h2>
-                <p>Searching for an interesting conversation partner</p>
-                <div class="search-status">
-                    <div class="search-progress-container">
-                        <div class="search-progress-bar"></div>
+                <h2 class="text-2xl font-heading font-bold mb-4 text-slate-800 dark:text-white">
+                    Finding Someone
+                    <span class="inline-flex">
+                        <span class="animate-bounce mx-0.5">.</span>
+                        <span class="animate-bounce mx-0.5 animation-delay-200">.</span>
+                        <span class="animate-bounce mx-0.5 animation-delay-400">.</span>
+                    </span>
+                </h2>
+                <p class="text-slate-600 dark:text-slate-300 mb-8">Searching for an interesting conversation partner</p>
+                <div class="mb-8">
+                    <div class="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div class="search-progress-bar h-full bg-gradient-to-r from-primary-600 to-primary-400 rounded-full" style="width: 0%"></div>
                     </div>
                 </div>
-                <button id="cancel-search" class="btn secondary-btn">
-                    <span class="btn-icon"><i class="fas fa-times"></i></span>
-                    <span class="btn-text">Cancel</span>
+                <button id="cancel-search" class="inline-flex items-center gap-2 px-6 py-3 text-base font-medium text-slate-700 dark:text-white bg-white dark:bg-slate-800 rounded-full shadow-md hover:shadow-lg border border-slate-200 dark:border-slate-700 hover:-translate-y-1 active:translate-y-0 transform transition-all duration-300">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
                 </button>
             </div>
         </div>
         
         <!-- Chat Screen - Redesigned with modern UI -->
-        <div id="chat-screen" class="screen" style="display: none;">
+        <div id="chat-screen" class="screen hidden">
             <div class="chat-container">
                 <!-- Chat Sidebar -->
                 <div class="chat-sidebar">
@@ -249,11 +374,277 @@
                 </div>
             </div>
         </div>
+
+        <!-- User Dashboard Section -->
+        <div id="user-dashboard" class="screen hidden">
+            <div class="dashboard-container">
+                <!-- Dashboard Header -->
+                <div class="dashboard-header">
+                    <div class="user-profile">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="user-info">
+                            <h2 class="user-nickname"></h2>
+                            <p class="user-status">Online now</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-actions">
+                        <button class="btn primary-btn" id="back-to-chat">
+                            <i class="fas fa-comments"></i> Back to Chat
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dashboard Content -->
+                <div class="dashboard-content">
+                    <!-- Dashboard Navigation -->
+                    <div class="dashboard-nav">
+                        <div class="nav-item active" data-tab="profile">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </div>
+                        <div class="nav-item" data-tab="settings">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </div>
+                        <div class="nav-item" data-tab="stats">
+                            <i class="fas fa-chart-simple"></i>
+                            <span>Stats</span>
+                        </div>
+                        <div class="nav-item" data-tab="themes">
+                            <i class="fas fa-paint-brush"></i>
+                            <span>Themes</span>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Tabs Content -->
+                    <div class="dashboard-tabs">
+                        <!-- Profile Tab -->
+                        <div class="dashboard-tab active" id="tab-profile">
+                            <h3><i class="fas fa-id-card"></i> Your Profile</h3>
+                            <div class="profile-card">
+                                <div class="profile-section">
+                                    <h4>Nickname</h4>
+                                    <div class="profile-field">
+                                        <span class="nickname-value"></span>
+                                        <button class="edit-btn" id="edit-nickname-btn">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                    </div>
+                                    <p class="field-description">This is how others see you in chat</p>
+                                </div>
+                                <div class="profile-section">
+                                    <h4>Bio</h4>
+                                    <div class="profile-field">
+                                        <span class="bio-value">Tell others about yourself...</span>
+                                        <button class="edit-btn" id="edit-bio-btn">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="profile-section">
+                                    <h4>Avatar Style</h4>
+                                    <div class="avatar-selector">
+                                        <div class="avatar-option selected">
+                                            <i class="fas fa-user-circle"></i>
+                                        </div>
+                                        <div class="avatar-option">
+                                            <i class="fas fa-user-astronaut"></i>
+                                        </div>
+                                        <div class="avatar-option">
+                                            <i class="fas fa-user-ninja"></i>
+                                        </div>
+                                        <div class="avatar-option">
+                                            <i class="fas fa-user-secret"></i>
+                                        </div>
+                                        <div class="avatar-option">
+                                            <i class="fas fa-user-tie"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Settings Tab -->
+                        <div class="dashboard-tab" id="tab-settings">
+                            <h3><i class="fas fa-sliders-h"></i> Preferences</h3>
+                            <div class="settings-card">
+                                <div class="settings-section">
+                                    <h4>Chat Settings</h4>
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <span>Notification Sound</span>
+                                            <p>Play a sound when you receive a message</p>
+                                        </div>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="notification-sound" checked>
+                                            <label for="notification-sound"></label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <span>Auto Scroll</span>
+                                            <p>Automatically scroll to new messages</p>
+                                        </div>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="auto-scroll" checked>
+                                            <label for="auto-scroll"></label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <span>Font Size</span>
+                                            <p>Adjust text size for the chat</p>
+                                        </div>
+                                        <div class="setting-control">
+                                            <select id="font-size">
+                                                <option value="small">Small</option>
+                                                <option value="medium" selected>Medium</option>
+                                                <option value="large">Large</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-section">
+                                    <h4>Privacy Settings</h4>
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <span>Block Images</span>
+                                            <p>Don't show images in chat (coming soon)</p>
+                                        </div>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="block-images">
+                                            <label for="block-images"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stats Tab -->
+                        <div class="dashboard-tab" id="tab-stats">
+                            <h3><i class="fas fa-chart-bar"></i> Your Activity</h3>
+                            <div class="stats-card">
+                                <div class="stats-row">
+                                    <div class="stat-box">
+                                        <div class="stat-icon"><i class="fas fa-comment"></i></div>
+                                        <div class="stat-value" id="total-chats">0</div>
+                                        <div class="stat-label">Total Chats</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-icon"><i class="fas fa-paper-plane"></i></div>
+                                        <div class="stat-value" id="messages-sent">0</div>
+                                        <div class="stat-label">Messages Sent</div>
+                                    </div>
+                                </div>
+                                <div class="stats-row">
+                                    <div class="stat-box">
+                                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                                        <div class="stat-value" id="time-spent">0m</div>
+                                        <div class="stat-label">Time Spent</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                                        <div class="stat-value" id="people-met">0</div>
+                                        <div class="stat-label">People Met</div>
+                                    </div>
+                                </div>
+                                <div class="stats-chart">
+                                    <h4>Activity Over Time</h4>
+                                    <div class="chart-placeholder">
+                                        <i class="fas fa-chart-line"></i>
+                                        <p>Your chat activity will appear here</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Themes Tab -->
+                        <div class="dashboard-tab" id="tab-themes">
+                            <h3><i class="fas fa-palette"></i> Personalize</h3>
+                            <div class="themes-card">
+                                <div class="theme-section">
+                                    <h4>Color Themes</h4>
+                                    <div class="theme-grid">
+                                        <div class="theme-option selected" data-theme="default">
+                                            <div class="theme-preview default-theme"></div>
+                                            <span>Default</span>
+                                        </div>
+                                        <div class="theme-option" data-theme="midnight">
+                                            <div class="theme-preview midnight-theme"></div>
+                                            <span>Midnight</span>
+                                        </div>
+                                        <div class="theme-option" data-theme="sunset">
+                                            <div class="theme-preview sunset-theme"></div>
+                                            <span>Sunset</span>
+                                        </div>
+                                        <div class="theme-option" data-theme="forest">
+                                            <div class="theme-preview forest-theme"></div>
+                                            <span>Forest</span>
+                                        </div>
+                                        <div class="theme-option" data-theme="ocean">
+                                            <div class="theme-preview ocean-theme"></div>
+                                            <span>Ocean</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chat-background-section">
+                                    <h4>Chat Background</h4>
+                                    <div class="background-grid">
+                                        <div class="bg-option selected" data-bg="default">
+                                            <div class="bg-preview bg-default"></div>
+                                            <span>Default</span>
+                                        </div>
+                                        <div class="bg-option" data-bg="gradient">
+                                            <div class="bg-preview bg-gradient"></div>
+                                            <span>Gradient</span>
+                                        </div>
+                                        <div class="bg-option" data-bg="dots">
+                                            <div class="bg-preview bg-dots"></div>
+                                            <span>Dots</span>
+                                        </div>
+                                        <div class="bg-option" data-bg="waves">
+                                            <div class="bg-preview bg-waves"></div>
+                                            <span>Waves</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         
-        <footer>
-            <p>WhiBO © 2025 | <a href="privacy.html" class="footer-link">Privacy</a> | <a href="terms.html" class="footer-link">Terms</a></p>
+        <footer class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+            <p>WhiBO © 2025 | <a href="privacy.html" class="text-primary-600 dark:text-primary-400 hover:underline">Privacy</a> | <a href="terms.html" class="text-primary-600 dark:text-primary-400 hover:underline">Terms</a></p>
         </footer>
     </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-switch');
+        
+        // Check for saved theme preference or use device preference
+        if (localStorage.getItem('color-theme') === 'dark' || 
+            (!localStorage.getItem('color-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            themeToggle.checked = true;
+        }
+        
+        // Listen for toggle changes
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            }
+        });
+    </script>
+    
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
 </body>

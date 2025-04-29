@@ -327,23 +327,29 @@
                         </div>
                     </div>
                     
-                    <!-- Chat input area with Tailwind CSS styling -->
-                    <div class="flex items-center gap-2 md:gap-3 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-3 px-2 md:py-4 md:px-4 shadow-sm w-full sticky bottom-0 z-10">
-                        <button class="flex-shrink-0 w-10 h-10 md:w-11 md:h-11 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors" id="emoji-btn" title="Insert Emoji">
-                            <i class="far fa-smile text-lg"></i>
-                        </button>
-                        
-                        <div class="flex-1 relative bg-slate-100 dark:bg-slate-700 rounded-2xl border border-slate-200 dark:border-slate-600 focus-within:border-primary-500 dark:focus-within:border-primary-400 focus-within:ring-2 focus-within:ring-primary-500/20 transition">
-                            <textarea id="message-input" class="w-full bg-transparent px-3 md:px-4 py-2 md:py-3 resize-none text-sm md:text-base leading-tight max-h-28 focus:outline-none text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500" placeholder="Type a message..." rows="1"></textarea>
+                    <!-- Chat input area with modern responsive design -->
+                    <div class="sticky bottom-0 z-10 bg-white dark:bg-slate-800 shadow-lg rounded-t-xl md:rounded-lg mx-auto w-full max-w-4xl px-3 py-3 md:px-4 md:py-4 border-t border-slate-100 dark:border-slate-700 transform transition-all duration-200">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <!-- Emoji button -->
+                            <button id="emoji-btn" class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-primary-500 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30" title="Insert Emoji">
+                                <i class="far fa-smile text-xl"></i>
+                            </button>
+                            
+                            <!-- Text input field -->
+                            <div class="relative flex-1 bg-slate-100 dark:bg-slate-700 rounded-2xl overflow-hidden transition-all duration-200 focus-within:ring-2 focus-within:ring-primary-500/30">
+                                <textarea id="message-input" class="block w-full bg-transparent px-4 py-3 max-h-32 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none focus:outline-none" placeholder="Type a message..." rows="1"></textarea>
+                            </div>
+                            
+                            <!-- Attachment button -->
+                            <button id="attach-btn" class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-primary-500 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30" title="Attach File">
+                                <i class="fas fa-paperclip text-xl"></i>
+                            </button>
+                            
+                            <!-- Send button -->
+                            <button id="send-message" class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-primary-600 to-primary-500 rounded-full flex items-center justify-center text-white shadow-md transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:from-primary-500 hover:to-primary-400 active:translate-y-0 active:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500/50" title="Send Message">
+                                <i class="fas fa-paper-plane text-xl"></i>
+                            </button>
                         </div>
-                        
-                        <button class="flex-shrink-0 w-10 h-10 md:w-11 md:h-11 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors" id="attach-btn" title="Attach File (coming soon)">
-                            <i class="fas fa-paperclip text-lg"></i>
-                        </button>
-                        
-                        <button id="send-message" class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white flex items-center justify-center shadow-md hover:shadow-lg hover:-translate-y-1 active:translate-y-0 transform transition-all duration-200" title="Send Message">
-                            <i class="fas fa-paper-plane text-lg"></i>
-                        </button>
                     </div>
 
                     <!-- Emoji Picker Panel (Hidden by default) -->

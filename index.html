@@ -1677,5 +1677,22 @@
     
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
+
+    <!-- Add this right before the end of body tag -->
+    <div class="matching-animation-container">
+        <div class="matching-animation">
+            <div class="matching-circles">
+                <div class="matching-circle user-circle">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="matching-circle stranger-circle">
+                    <i class="fas fa-user-secret"></i>
+                </div>
+            </div>
+            <div class="matching-text">Connecting you with a stranger...</div>
+        </div>
+        <div class="connected-text">Connected!</div>
+        <div class="connected-pulse"></div>
+    </div>
 </body>
 </html>

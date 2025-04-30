@@ -690,52 +690,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Create confetti effect for successful match
     function createConfetti() {
-        if (!animationsEnabled || confettiActive) return;
+        const colors = ['#818cf8', '#4f46e5', '#f472b6', '#ec4899', '#34d399', '#10b981'];
+        const shapes = ['circle', 'square', 'triangle'];
         
-        confettiActive = true;
-        
-        // Colors for confetti particles
-        const colors = ['#6366f1', '#f472b6', '#34d399', '#fbbf24', '#f87171'];
-        
-        // Create multiple confetti pieces
         for (let i = 0; i < 100; i++) {
-            createConfettiPiece(colors);
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            
+            // Random position, color, shape
+            const left = Math.random() * 100;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            const delay = Math.random() * 3;
+            const rotation = Math.random() * 360;
+            const size = Math.random() * 10 + 5;
+            
+            confetti.style.left = `${left}%`;
+            confetti.style.backgroundColor = color;
+            confetti.style.width = `${size}px`;
+            confetti.style.height = shape === 'circle' ? `${size}px` : shape === 'square' ? `${size}px` : `${size * 1.5}px`;
+            confetti.style.borderRadius = shape === 'circle' ? '50%' : '0';
+            
+            if (shape === 'triangle') {
+                confetti.style.backgroundColor = 'transparent';
+                confetti.style.borderBottom = `${size * 1.5}px solid ${color}`;
+                confetti.style.borderLeft = `${size / 2}px solid transparent`;
+                confetti.style.borderRight = `${size / 2}px solid transparent`;
+            }
+            
+            confetti.style.animationDelay = `${delay}s`;
+            confetti.style.transform = `rotate(${rotation}deg)`;
+            
+            document.body.appendChild(confetti);
+            
+            // Remove confetti after animation completes
+            setTimeout(() => {
+                if (confetti && confetti.parentNode) {
+                    confetti.parentNode.removeChild(confetti);
+                }
+            }, 5000 + (delay * 1000));
         }
-        
-        // Reset flag after animation completes
-        setTimeout(() => {
-            confettiActive = false;
-        }, 5000);
-    }
-
-    // Create individual confetti piece
-    function createConfettiPiece(colors) {
-        if (!chatScreen) return;
-        
-        // Create confetti element
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        
-        // Random styles for variety
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const shape = Math.random() > 0.5 ? 'circle' : 'rectangle';
-        const size = Math.floor(Math.random() * 10) + 5; // 5-15px
-        const left = Math.floor(Math.random() * 100); // 0-100%
-        const animationDuration = (Math.random() * 3) + 2; // 2-5s
-        
-        // Apply styles
-        confetti.style.backgroundColor = color;
-        confetti.style.borderRadius = shape === 'circle' ? '50%' : '3px';
-        confetti.style.width = `${size}px`;
-        confetti.style.height = shape === 'circle' ? `${size}px` : `${size * 0.6}px`;
-        confetti.style.left = `${left}%`;
-        confetti.style.animationDuration = `${animationDuration}s`;
-        
-        // Add to DOM and remove when animation completes
-        chatScreen.appendChild(confetti);
-        setTimeout(() => {
-            confetti.remove();
-        }, animationDuration * 1000);
     }
 
     // Display toast notification
@@ -885,6 +879,75 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
     }
     
+    // Add makeChatFullScreen function to handle fullscreen mode
+    function makeChatFullScreen(enable) {
+        const chatContainer = document.querySelector('.chat-container');
+        
+        if (!chatContainer) return;
+        
+        if (enable) {
+            chatContainer.classList.add('chat-fullscreen-mode');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling behind fullscreen
+        } else {
+            chatContainer.classList.remove('chat-fullscreen-mode');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+    }
+
+    // Function to show matching animation
+    function showMatchingAnimation() {
+        return new Promise((resolve) => {
+            const matchingContainer = document.querySelector('.matching-animation-container');
+            
+            if (!matchingContainer) {
+                console.error('Matching animation container not found');
+                resolve();
+                return;
+            }
+            
+            // Display the animation
+            matchingContainer.classList.add('active');
+            
+            // Play the animation sequence
+            setTimeout(() => {
+                // After circles move towards each other, show connected message
+                const connectedText = matchingContainer.querySelector('.connected-text');
+                const connectedPulse = matchingContainer.querySelector('.connected-pulse');
+                const circles = matchingContainer.querySelector('.matching-circles');
+                const matchingText = matchingContainer.querySelector('.matching-text');
+                
+                if (circles && matchingText) {
+                    circles.style.opacity = '0';
+                    matchingText.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        if (connectedText) connectedText.classList.add('active');
+                        if (connectedPulse) connectedPulse.classList.add('active');
+                        
+                        // Hide animation and resolve promise after the animation completes
+                        setTimeout(() => {
+                            matchingContainer.classList.remove('active');
+                            
+                            // Reset animation elements for next use
+                            setTimeout(() => {
+                                if (circles) circles.style.opacity = '1';
+                                if (matchingText) matchingText.style.opacity = '1';
+                                if (connectedText) connectedText.classList.remove('active');
+                                if (connectedPulse) connectedPulse.classList.remove('active');
+                                
+                                resolve();
+                            }, 300);
+                        }, 1500);
+                    }, 500);
+                } else {
+                    // If elements aren't found, resolve immediately
+                    matchingContainer.classList.remove('active');
+                    resolve();
+                }
+            }, 2000);
+        });
+    }
+
     // Event listeners with enhanced connection checks
     if (startChatBtn) {
         startChatBtn.addEventListener('click', () => {
@@ -969,40 +1032,44 @@ document.addEventListener('DOMContentLoaded', () => {
         isSearching = false;
         chatActive = true;
         
-        // Show chat screen
-        if (chatScreen) {
-            // First ensure the display property is set before showing the screen
-            chatScreen.style.display = 'flex';
-            // Force a reflow to ensure the display change takes effect
-            void chatScreen.offsetWidth;
-            // Then activate the screen
-            showScreen(chatScreen);
-        }
-        
-        if (statusText) statusText.textContent = 'Connected with Stranger';
-        
-        const statusDot = document.querySelector('.status-dot');
-        if (statusDot) statusDot.style.backgroundColor = 'var(--success)';
-        
-        if (endChatBtn) {
-            endChatBtn.innerHTML = '<i class="fas fa-door-open"></i><span>End Chat</span>';
-        }
-        
-        if (chatMessages) chatMessages.innerHTML = '';
-        lastMessageDate = null;
-        addSystemMessage('You are now connected with a stranger');
-        
-        socket.emit('set nickname', userNickname);
-        
-        setTimeout(() => {
-            if (messageInput) messageInput.focus();
+        // Show matching animation before displaying chat
+        showMatchingAnimation().then(() => {
+            // After animation completes, show the chat screen in fullscreen mode
+            if (chatScreen) {
+                chatScreen.style.display = 'flex';
+                showScreen(chatScreen);
+                
+                // Make chat fullscreen after a slight delay
+                setTimeout(() => {
+                    makeChatFullScreen(true);
+                }, 300);
+            }
             
-            // Add celebration effect
-            createConfetti();
+            if (statusText) statusText.textContent = 'Connected with Stranger';
             
-            // Show welcome toast
-            showToast('Connected! Start chatting now!', 'success');
-        }, 300);
+            const statusDot = document.querySelector('.status-dot');
+            if (statusDot) statusDot.style.backgroundColor = 'var(--success)';
+            
+            if (endChatBtn) {
+                endChatBtn.innerHTML = '<i class="fas fa-door-open"></i><span>End Chat</span>';
+            }
+            
+            if (chatMessages) chatMessages.innerHTML = '';
+            lastMessageDate = null;
+            addSystemMessage('You are now connected with a stranger');
+            
+            if (socket) socket.emit('set nickname', userNickname);
+            
+            setTimeout(() => {
+                if (messageInput) messageInput.focus();
+                
+                // Add celebration effect
+                createConfetti();
+                
+                // Show welcome toast
+                showToast('Connected! Start chatting now!', 'success');
+            }, 300);
+        });
     });
     
     // Handle incoming messages with enhanced UI

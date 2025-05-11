@@ -1,0 +1,27 @@
+{
+  "name": "whibo",
+  "version": "1.0.0",
+  "description": "WhiBO - Chat with random strangers anonymously",
+  "main": "src/server/server.js",
+  "scripts": {
+    "start": "node src/server/server.js",
+    "dev": "nodemon src/server/server.js",
+    "build": "echo 'Build step completed'",
+    "lint": "eslint src/",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "dotenv": "^16.3.1"
+  },  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "eslint": "^8.42.0",
+    "eslint-config-prettier": "^8.8.0",
+    "jest": "^29.5.0",
+    "prettier": "^2.8.8"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

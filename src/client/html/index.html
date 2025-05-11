@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WhiBO - Anonymous Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        },
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                        'heading': ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'bounce-in': 'bounceIn 0.6s ease-in-out',
+                        'slide-up': 'slideUp 0.4s ease-in-out',
+                        'slide-in-right': 'slideInRight 0.4s ease-in-out',
+                        'slide-in-left': 'slideInLeft 0.4s ease-in-out',
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'scale-in': 'scaleIn 0.4s ease-in-out',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        bounceIn: {
+                            '0%': { transform: 'scale(0.8)', opacity: '0' },
+                            '70%': { transform: 'scale(1.05)', opacity: '1' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        slideInRight: {
+                            '0%': { transform: 'translateX(20px)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        slideInLeft: {
+                            '0%': { transform: 'translateX(-20px)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.9)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        },
+                    },
+                },
+            },
+            plugins: [],
+        }
+    </script>
+    <!-- Custom styles to override Tailwind or add custom animations -->
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+        }
+        .chat-bubble-anim {
+            position: relative;
+            width: 100%;
+            height: 240px;
+        }
+        .chat-bubble {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            color: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation-duration: 3s;
+            animation-iteration-count: infinite;
+            animation-timing-function: ease-in-out;
+        }
+        .b1 {
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            left: 20%;
+            top: 20%;
+            animation-name: float-bubble-1;
+        }
+        .b2 {
+            background: linear-gradient(135deg, #ec4899, #f472b6);
+            left: 50%;
+            top: 10%;
+            animation-name: float-bubble-2;
+            animation-delay: 0.5s;
+        }
+        .b3 {
+            background: linear-gradient(135deg, #0891b2, #22d3ee);
+            right: 20%;
+            top: 30%;
+            animation-name: float-bubble-3;
+            animation-delay: 1s;
+        }
+        @keyframes float-bubble-1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-15px, -15px); }
+        }
+        @keyframes float-bubble-2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(5px, -20px); }
+        }
+        @keyframes float-bubble-3 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(15px, -10px); }
+        }
+        
+        /* New Chat Box Styles */
+        .chat-container {
+            display: flex;
+            height: calc(100vh - 13rem);
+            max-height: 800px;
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(79, 70, 229, 0.15), 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: all 0.5s ease;
+            margin-bottom: 2rem;
+        }
+        
+        .dark .chat-container {
+            background-color: rgba(30, 41, 59, 0.85);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .chat-main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* Improved Chat Header */
+        .chat-header-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .dark .chat-header-main {
+            background-color: rgba(30, 41, 59, 0.95);
+            border-bottom-color: rgba(55, 65, 81, 0.5);
+        }
+        
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .stranger-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
+            position: relative;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        
+        .stranger-avatar::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            z-index: -1;
+            opacity: 0.4;
+            filter: blur(8px);
+        }
+        
+        .stranger-avatar i {
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stranger-status {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .stranger-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1rem;
+        }
+        
+        .dark .stranger-name {
+            color: #e2e8f0;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            margin-top: 0.125rem;
+        }
+        
+        .status-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: #10b981;
+            position: relative;
+        }
+        
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: #10b981;
+            opacity: 0.5;
+            animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+            transform-origin: center;
+        }
+        
+        .status-text-small {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        
+        .dark .status-text-small {
+            color: #94a3b8;
+        }
+        
+        .chat-header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .icon-action {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(241, 245, 249, 0.8);
+            color: #475569;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .dark .icon-action {
+            background-color: rgba(30, 41, 59, 0.8);
+            color: #94a3b8;
+            border-color: rgba(51, 65, 85, 0.8);
+        }
+        
+        .icon-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            background-color: #f8fafc;
+            color: #4f46e5;
+        }
+        
+        .dark .icon-action:hover {
+            background-color: #334155;
+            color: #818cf8;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Enhanced Chat Main Area */
+        .chat-main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* New 3D Background Effects */
+        .chat-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .chat-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 85% 60%, rgba(236, 72, 153, 0.05) 0%, transparent 55%);
+        }
+        
+        .dark .chat-background::before {
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 60%, rgba(244, 114, 182, 0.08) 0%, transparent 55%);
+        }
+
+        /* Improved Message Bubbles with Animation */
+        #chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .message {
+            display: flex;
+            gap: 0.75rem;
+            max-width: 85%;
+            animation-fill-mode: both;
+        }
+        
+        .message.system {
+            align-self: center;
+            background-color: rgba(241, 245, 249, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            margin: 1rem 0;
+            font-size: 0.875rem;
+            color: #64748b;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .dark .message.system {
+            background-color: rgba(51, 65, 85, 0.8);
+            color: #94a3b8;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .message.incoming {
+            align-self: flex-start;
+            animation: slideInLeft 0.4s ease;
+        }
+        
+        .message.outgoing {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+            animation: slideInRight 0.4s ease;
+        }
+        
+        .message-avatar {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            flex-shrink: 0;
+            margin-top: 0.25rem;
+        }
+        
+        .dark .message-avatar {
+            background-color: #334155;
+            color: #94a3b8;
+            border-color: rgba(51, 65, 85, 0.8);
+        }
+        
+        .message.outgoing .message-avatar {
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            color: white;
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+        
+        .message-content {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message-bubble {
+            padding: 1rem;
+            border-radius: 1rem;
+            position: relative;
+            margin-bottom: 0.25rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            overflow-wrap: break-word;
+            word-break: break-word;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            overflow: hidden;
+        }
+        
+        .message-bubble::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            border-radius: inherit;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+        
+        .message.incoming .message-bubble {
+            background-color: rgba(241, 245, 249, 0.8);
+            color: #1e293b;
+            border-top-left-radius: 0.25rem;
+            backdrop-filter: blur(8px);
+        }
+        
+        .dark .message.incoming .message-bubble {
+            background-color: rgba(51, 65, 85, 0.8);
+            color: #e2e8f0;
+        }
+        
+        .message.outgoing .message-bubble {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: white;
+            border-top-right-radius: 0.25rem;
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            align-self: flex-end;
+            margin-right: 0.25rem;
+        }
+        
+        .dark .message-time {
+            color: #64748b;
+        }
+        
+        .message.outgoing .message-time {
+            color: #e2e8f0;
+        }
+
+        /* Enhanced Typing Indicator */
+        #typing-indicator {
+            display: none;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        #typing-indicator.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .typing-bubble {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.75rem;
+        }
+        
+        .typing-avatar {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        
+        .dark .typing-avatar {
+            background-color: #334155;
+            color: #94a3b8;
+            border-color: rgba(51, 65, 85, 0.8);
+        }
+        
+        .typing-dots {
+            height: 2rem;
+            padding: 0.5rem 1rem;
+            background-color: rgba(241, 245, 249, 0.8);
+            border-radius: 1rem;
+            border-top-left-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .dark .typing-dots {
+            background-color: rgba(51, 65, 85, 0.8);
+        }
+        
+        .typing-dots span {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: #94a3b8;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        
+        .dark .typing-dots span {
+            background-color: #64748b;
+        }
+        
+        .typing-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .typing-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-0.5rem); }
+        }
+        
+        /* New Enhanced Input Area */
+        .chat-input-area {
+            padding: 1rem 1.25rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(229, 231, 235, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .dark .chat-input-area {
+            background-color: rgba(30, 41, 59, 0.9);
+            border-top-color: rgba(55, 65, 81, 0.5);
+        }
+        
+        .input-action-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f1f5f9;
+            color: #64748b;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .dark .input-action-btn {
+            background-color: #334155;
+            color: #94a3b8;
+            border-color: rgba(51, 65, 85, 0.8);
+        }
+        
+        .input-action-btn:hover {
+            background-color: #f8fafc;
+            color: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .dark .input-action-btn:hover {
+            background-color: #475569;
+            color: #818cf8;
+        }
+        
+        .input-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        #message-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 1.5rem;
+            resize: none;
+            outline: none;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            max-height: 120px;
+            transition: all 0.2s ease;
+        }
+        
+        .dark #message-input {
+            border-color: rgba(51, 65, 85, 0.8);
+            background-color: #1e293b;
+            color: #e2e8f0;
+        }
+        
+        #message-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        .dark #message-input:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+        }
+        
+        .send-btn {
+            width: 3.25rem;
+            height: 2.5rem;
+            border-radius: 0.75rem;
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .send-btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0.1), transparent);
+            pointer-events: none;
+        }
+        
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+        }
+        
+        .send-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Improved Sidebar */
+        .chat-sidebar {
+            width: 18rem;
+            background: rgba(249, 250, 251, 0.8);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(229, 231, 235, 0.5);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .dark .chat-sidebar {
+            background-color: rgba(15, 23, 42, 0.85);
+            border-right-color: rgba(51, 65, 85, 0.5);
+        }
+        
+        .sidebar-header {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        
+        .dark .sidebar-header {
+            border-bottom-color: rgba(55, 65, 81, 0.5);
+        }
+        
+        .sidebar-actions {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .sidebar-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 500;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .dark .sidebar-btn {
+            background-color: #334155;
+            color: #94a3b8;
+            border-color: rgba(51, 65, 85, 0.8);
+        }
+        
+        .sidebar-btn:hover {
+            background-color: #f8fafc;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+        
+        .dark .sidebar-btn:hover {
+            background-color: #475569;
+        }
+        
+        .sidebar-btn.danger {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border-color: rgba(248, 113, 113, 0.2);
+        }
+        
+        .dark .sidebar-btn.danger {
+            background-color: rgba(185, 28, 28, 0.2);
+            color: #f87171;
+            border-color: rgba(248, 113, 113, 0.2);
+        }
+        
+        .sidebar-btn.danger:hover {
+            background-color: #fecaca;
+        }
+        
+        .dark .sidebar-btn.danger:hover {
+            background-color: rgba(185, 28, 28, 0.3);
+        }
+        
+        .chat-info {
+            padding: 1rem;
+            margin-top: auto;
+        }
+        
+        .info-box {
+            background-color: rgba(241, 245, 249, 0.8);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        
+        .dark .info-box {
+            background-color: rgba(51, 65, 85, 0.8);
+            border-color: rgba(55, 65, 81, 0.8);
+        }
+        
+        .info-box h3 {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #475569;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .dark .info-box h3 {
+            color: #e2e8f0;
+        }
+        
+        .chat-tips {
+            list-style: none;
+            font-size: 0.8rem;
+            color: #64748b;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .dark .chat-tips {
+            color: #94a3b8;
+        }
+        
+        .chat-tips li {
+            padding-left: 0.75rem;
+            position: relative;
+            line-height: 1.4;
+        }
+        
+        .chat-tips li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #6366f1;
+        }
+        
+        .chat-tips kbd {
+            background-color: #f8fafc;
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            border: 1px solid #e2e8f0;
+            font-family: monospace;
+            font-size: 0.7rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .dark .chat-tips kbd {
+            background-color: #1e293b;
+            border-color: #334155;
+        }
+
+        /* New 3D Perspective Effects */
+        .perspective-container {
+            perspective: 2000px;
+        }
+        
+        .chat-container {
+            transform: translate3d(0, 0, 0);
+        }
+        
+        .chat-container:hover {
+            transform: translate3d(0, -5px, 30px);
+        }
+        
+        /* Message bubbles 3D hover effect */
+        .message-bubble:hover {
+            transform: translateZ(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Emoji picker panel - enhanced */
+        .emoji-picker {
+            position: absolute;
+            right: 1rem;
+            bottom: 5rem;
+            width: 18rem;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            overflow: hidden;
+            display: none;
+            z-index: 100;
+            transform-origin: bottom right;
+        }
+        
+        .dark .emoji-picker {
+            background-color: #1e293b;
+            border-color: rgba(55, 65, 81, 0.8);
+        }
+        
+        .emoji-picker.visible {
+            display: block;
+            animation: scaleIn 0.3s ease-out;
+        }
+        
+        .emoji-picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        
+        .dark .emoji-picker-header {
+            border-bottom-color: rgba(55, 65, 81, 0.8);
+        }
+        
+        .emoji-picker-header h4 {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #475569;
+        }
+        
+        .dark .emoji-picker-header h4 {
+            color: #f8fafc;
+        }
+        
+        .close-btn {
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: transparent;
+            color: #64748b;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .close-btn:hover {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+        
+        .dark .close-btn:hover {
+            background-color: #334155;
+            color: #e2e8f0;
+        }
+        
+        .emoji-categories {
+            display: flex;
+            overflow-x: auto;
+            padding: 0.5rem 0.75rem;
+            gap: 0.25rem;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            scrollbar-width: none;
+        }
+        
+        .dark .emoji-categories {
+            border-bottom-color: rgba(55, 65, 81, 0.8);
+        }
+        
+        .emoji-categories::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .emoji-category {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: transparent;
+            color: #64748b;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .emoji-category.active {
+            background-color: #f1f5f9;
+            color: #6366f1;
+        }
+        
+        .dark .emoji-category.active {
+            background-color: #334155;
+            color: #818cf8;
+        }
+        
+        .emoji-category:hover:not(.active) {
+            background-color: rgba(241, 245, 249, 0.5);
+            color: #475569;
+        }
+        
+        .dark .emoji-category:hover:not(.active) {
+            background-color: rgba(51, 65, 85, 0.5);
+            color: #e2e8f0;
+        }
+        
+        .emoji-container {
+            padding: 0.75rem;
+            max-height: 12rem;
+            overflow-y: auto;
+        }
+        
+        .emoji-char {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            font-size: 1.25rem;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+        }
+        
+        .emoji-char:hover {
+            background-color: #f1f5f9;
+            transform: scale(1.2);
+        }
+        
+        .dark .emoji-char:hover {
+            background-color: #334155;
+        }
+        
+        /* New Date Separator */
+        .date-separator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+        
+        .date-separator::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background-color: rgba(226, 232, 240, 0.8);
+            z-index: 1;
+        }
+        
+        .dark .date-separator::before {
+            background-color: rgba(55, 65, 81, 0.8);
+        }
+        
+        .date-separator-text {
+            background-color: #f8fafc;
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            color: #64748b;
+            position: relative;
+            z-index: 2;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        
+        .dark .date-separator-text {
+            background-color: #1e293b;
+            color: #94a3b8;
+            border-color: rgba(55, 65, 81, 0.8);
+        }
+
+        /* Custom Scrollbars */
+        .chat-main::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-main::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+        
+        .chat-main::-webkit-scrollbar-thumb {
+            background-color: rgba(203, 213, 225, 0.5);
+            border-radius: 100px;
+        }
+        
+        .dark .chat-main::-webkit-scrollbar-thumb {
+            background-color: rgba(71, 85, 105, 0.5);
+        }
+        
+        .chat-main::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(148, 163, 184, 0.8);
+        }
+        
+        .dark .chat-main::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(100, 116, 139, 0.8);
+        }
+
+        /* Always show theme toggle */
+        .theme-toggle {
+            z-index: 10000 !important;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .chat-container {
+                height: calc(100vh - 9rem);
+            }
+            
+            .chat-sidebar {
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 10;
+                transform: translateX(-100%);
+                opacity: 0;
+                box-shadow: 5px 0 25px rgba(0, 0, 0, 0.1);
+            }
+            
+            .chat-sidebar.visible {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            
+            .chat-tips li {
+                font-size: 0.75rem;
+            }
+        }
+        
+        /* Theme switch improved */
+        #theme-switch:checked + .theme-toggle-label {
+            background-color: #1e1b4b;
+        }
+        #theme-switch:checked + .theme-toggle-label .toggle-circle {
+            transform: translateX(24px);
+            background-color: #6366f1;
+        }
+        
+        /* Confetti animation for match celebration */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0;
+            transform: translateY(0) rotate(0);
+            pointer-events: none;
+            animation: confetti-fall 5s ease-in-out forwards;
+            z-index: 9999;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                opacity: 1;
+                transform: translateY(-100vh) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(720deg);
+            }
+        }
+    </style>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta name="description" content="WhiBO - Chat with random strangers anonymously from around the world">
+</head>
+<body class="font-sans bg-slate-50 dark:bg-slate-900 min-h-screen">
+    <!-- Theme toggle switch -->
+    <div class="fixed top-6 right-6 z-50">
+        <label for="theme-switch" class="relative inline-flex cursor-pointer items-center">
+            <input type="checkbox" id="theme-switch" class="sr-only peer">
+            <div class="theme-toggle-label h-7 w-14 rounded-full bg-slate-200 after:absolute after:left-[3px] after:top-[3px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all dark:bg-slate-700 peer-checked:after:translate-x-7 peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 peer-checked:bg-primary-600 peer-checked:after:bg-primary-400">
+                <span class="absolute left-2 top-1.5 text-xs text-slate-400 dark:text-slate-200">
+                    <i class="fas fa-moon"></i>
+                </span>
+                <span class="absolute right-2 top-1.5 text-xs text-slate-400 dark:text-slate-200">
+                    <i class="fas fa-sun"></i>
+                </span>
+            </div>
+        </label>
+    </div>
+
+    <!-- Background elements -->
+    <div class="fixed inset-0 overflow-hidden -z-10">
+        <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-primary-400/10 rounded-full blur-3xl transform translate-x-1/4 -translate-y-1/4"></div>
+        <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-pink-400/10 rounded-full blur-3xl transform -translate-x-1/4 translate-y-1/4"></div>
+        <div class="absolute top-1/2 left-1/3 w-1/3 h-1/3 bg-cyan-400/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- App Header -->
+        <header class="py-6 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center text-white shadow-lg shadow-primary-500/20">
+                    <i class="fas fa-comment-dots text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-heading text-2xl font-bold bg-clip-text text-transparent bg-gradient-primary">WhiBO</h1>
+                    <div class="text-sm text-slate-600 dark:text-slate-300">Anonymous Chat</div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active py-10 sm:py-16">
+            <div class="max-w-4xl mx-auto">
+                <!-- Hero Section -->
+                <div class="text-center mb-16">
+                    <div class="chat-bubble-anim mb-8 mx-auto">
+                        <div class="chat-bubble b1 text-xl"><i class="fas fa-smile"></i></div>
+                        <div class="chat-bubble b2 text-xl"><i class="fas fa-globe"></i></div>
+                        <div class="chat-bubble b3 text-xl"><i class="fas fa-lock"></i></div>
+                    </div>
+                    <h2 class="text-4xl sm:text-5xl font-heading font-bold mb-6 text-slate-800 dark:text-white">
+                        Talk to <span class="text-primary-600 dark:text-primary-400">Strangers</span>
+                    </h2>
+                    <p class="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+                        Connect instantly with random people from around the world. Anonymous, secure, and free.
+                    </p>
+                </div>
+                
+                <!-- Features Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                    <!-- Anonymous Feature -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/30 transform transition duration-300 hover:-translate-y-2">
+                        <div class="w-14 h-14 mb-4 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                            <i class="fas fa-mask text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-heading font-semibold mb-2 text-slate-800 dark:text-white">Anonymous</h3>
+                        <p class="text-slate-600 dark:text-slate-300">Chat without revealing your identity</p>
+                    </div>
+                    
+                    <!-- Instant Feature -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/30 transform transition duration-300 hover:-translate-y-2">
+                        <div class="w-14 h-14 mb-4 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center text-pink-600 dark:text-pink-400">
+                            <i class="fas fa-bolt text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-heading font-semibold mb-2 text-slate-800 dark:text-white">Instant</h3>
+                        <p class="text-slate-600 dark:text-slate-300">Connect with someone in seconds</p>
+                    </div>
+                    
+                    <!-- Secure Feature -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/30 transform transition duration-300 hover:-translate-y-2">
+                        <div class="w-14 h-14 mb-4 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                            <i class="fas fa-shield-alt text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-heading font-semibold mb-2 text-slate-800 dark:text-white">Secure</h3>
+                        <p class="text-slate-600 dark:text-slate-300">Your conversations stay private</p>
+                    </div>
+                </div>
+                
+                <!-- Start Button Section -->
+                <div class="text-center">
+                    <button id="start-chat" class="inline-flex items-center gap-2 px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-full shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 hover:-translate-y-1 active:translate-y-0 transform transition-all duration-300 animate-pulse-slow">
+                        <i class="fas fa-comment-dots"></i>
+                        <span>Start Chatting Now</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Waiting Screen -->
+        <div id="waiting-screen" class="screen hidden py-10">
+            <div class="max-w-md mx-auto text-center">
+                <div class="mb-8">
+                    <div class="w-40 h-40 mx-auto mb-6 relative border-4 border-primary-100 dark:border-primary-900/30 rounded-full">
+                        <div class="absolute inset-0 rounded-full border-t-4 border-primary-500 animate-spin"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-search text-4xl text-primary-500"></i>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-heading font-bold mb-4 text-slate-800 dark:text-white">
+                    Finding Someone
+                    <span class="inline-flex">
+                        <span class="animate-bounce mx-0.5">.</span>
+                        <span class="animate-bounce mx-0.5 animation-delay-200">.</span>
+                        <span class="animate-bounce mx-0.5 animation-delay-400">.</span>
+                    </span>
+                </h2>
+                <p class="text-slate-600 dark:text-slate-300 mb-8">Searching for an interesting conversation partner</p>
+                <div class="mb-8">
+                    <div class="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div class="search-progress-bar h-full bg-gradient-to-r from-primary-600 to-primary-400 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+                <button id="cancel-search" class="inline-flex items-center gap-2 px-6 py-3 text-base font-medium text-slate-700 dark:text-white bg-white dark:bg-slate-800 rounded-full shadow-md hover:shadow-lg border border-slate-200 dark:border-slate-700 hover:-translate-y-1 active:translate-y-0 transform transition-all duration-300">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Chat Screen - Redesigned with modern UI -->
+        <div id="chat-screen" class="screen hidden">
+            <div class="chat-container">
+                <!-- Chat Sidebar -->
+                <div class="chat-sidebar">
+                    <div class="sidebar-header">
+                        <div class="chat-status">
+                            <div class="status-indicator">
+                                <span class="status-dot"></span>
+                                <span class="status-text">Connected with Stranger</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="sidebar-actions">
+                        <button class="sidebar-btn" id="new-topic-btn" title="Suggest New Topic">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>New Topic</span>
+                        </button>
+                        
+                        <button class="sidebar-btn" id="toggle-emoji-btn" title="Insert Emoji">
+                            <i class="far fa-smile"></i>
+                            <span>Emoji</span>
+                        </button>
+                        
+                        <button class="sidebar-btn danger" id="end-chat">
+                            <i class="fas fa-door-open"></i>
+                            <span>End Chat</span>
+                        </button>
+                    </div>
+                    
+                    <div class="chat-info">
+                        <div class="info-box">
+                            <h3><i class="fas fa-info-circle"></i> Chat Tips</h3>
+                            <ul class="chat-tips">
+                                <li>Be respectful to your chat partner</li>
+                                <li>Press <kbd>Enter</kbd> to send message</li>
+                                <li>Press <kbd>Shift</kbd> + <kbd>Enter</kbd> for new line</li>
+                                <li>Type <kbd>/help</kbd> for more commands</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main Chat Area -->
+                <div class="chat-main-container">
+                    <div class="chat-header-main">
+                        <div class="chat-header-info">
+                            <div class="stranger-avatar">
+                                <i class="fas fa-user-secret"></i>
+                            </div>
+                            <div class="stranger-status">
+                                <div class="stranger-name">Anonymous Stranger</div>
+                                <div class="status-indicator">
+                                    <span class="status-dot"></span>
+                                    <span class="status-text-small">Active Now</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-header-actions">
+                            <button class="icon-action" id="toggle-sidebar" title="Toggle Sidebar">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-main">
+                        <div class="chat-background"></div>
+                        <div id="chat-messages"></div>
+                        <div id="typing-indicator">
+                            <div class="typing-bubble">
+                                <div class="typing-avatar">
+                                    <i class="fas fa-user-secret"></i>
+                                </div>
+                                <div class="typing-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <button class="input-action-btn" id="emoji-btn" title="Insert Emoji">
+                            <i class="far fa-smile"></i>
+                        </button>
+                        <div class="input-container">
+                            <textarea id="message-input" placeholder="Type a message..." rows="1"></textarea>
+                        </div>
+                        <button class="input-action-btn" id="attach-btn" title="Attach File (coming soon)">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button id="send-message" class="btn send-btn" title="Send Message">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Emoji Picker Panel (Hidden by default) -->
+                <div class="emoji-picker">
+                    <div class="emoji-picker-header">
+                        <h4>Emojis</h4>
+                        <button id="close-emoji" class="close-btn"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="emoji-categories">
+                        <button class="emoji-category active" data-category="recent"><i class="fas fa-clock"></i></button>
+                        <button class="emoji-category" data-category="smileys"><i class="fas fa-smile"></i></button>
+                        <button class="emoji-category" data-category="people"><i class="fas fa-user"></i></button>
+                        <button class="emoji-category" data-category="animals"><i class="fas fa-paw"></i></button>
+                        <button class="emoji-category" data-category="food"><i class="fas fa-utensils"></i></button>
+                        <button class="emoji-category" data-category="activities"><i class="fas fa-futbol"></i></button>
+                        <button class="emoji-category" data-category="travel"><i class="fas fa-car"></i></button>
+                        <button class="emoji-category" data-category="objects"><i class="fas fa-lightbulb"></i></button>
+                        <button class="emoji-category" data-category="symbols"><i class="fas fa-heart"></i></button>
+                    </div>
+                    <div class="emoji-container">
+                        <!-- Emojis will be loaded dynamically -->
+                        <div class="emoji-group" data-category="recent">
+                            <span class="emoji-char" data-emoji="😀">😀</span>
+                            <span class="emoji-char" data-emoji="👍">👍</span>
+                            <span class="emoji-char" data-emoji="👋">👋</span>
+                            <span class="emoji-char" data-emoji="😊">😊</span>
+                            <span class="emoji-char" data-emoji="🙂">🙂</span>
+                        </div>
+                        <!-- Other emoji categories will be added via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Dashboard Section -->
+        <div id="user-dashboard" class="screen hidden">
+            <div class="dashboard-container">
+                <!-- Dashboard Header -->
+                <div class="dashboard-header">
+                    <div class="user-profile">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="user-info">
+                            <h2 class="user-nickname"></h2>
+                            <p class="user-status">Online now</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-actions">
+                        <button class="btn primary-btn" id="back-to-chat">
+                            <i class="fas fa-comments"></i> Back to Chat
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dashboard Content -->
+                <div class="dashboard-content">
+                    <!-- Dashboard Navigation -->
+                    <div class="dashboard-nav">
+                        <div class="nav-item active" data-tab="profile">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </div>
+                        <div class="nav-item" data-tab="settings">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </div>
+                        <div class="nav-item" data-tab="stats">
+                            <i class="fas fa-chart-simple"></i>
+                            <span>Stats</span>
+                        </div>
+                        <div class="nav-item" data-tab="themes">
+                            <i class="fas fa-paint-brush"></i>
+                            <span>Themes</span>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Tabs Content -->
+                    <div class="dashboard-tabs">
+                        <!-- Profile Tab -->
+                        <div class="dashboard-tab active" id="tab-profile">
+                            <h3><i class="fas fa-id-card"></i> Your Profile</h3>
+                            <div class="profile-card">
+                                <div class="profile-section">
+                                    <h4>Nickname</h4>
+                                    <div class="profile-field">
+                                        <span class="nickname-value"></span>
+                                        <button class="edit-btn" id="edit-nickname-btn">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                    </div>
+                                    <p class="field-description">This is how others see you in chat</p>
+                                </div>
+                                <div class="profile-section">
+                                    <h4>Bio</h4>
+                                    <div class="profile-field">
+                                        <span class="bio-value">Tell others about yourself...</span>
+                                        <button class="edit-btn" id="edit-bio-btn">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="profile-section">
+                                    <h4>Avatar Style</h4>
+                                    <div class="avatar-selector">
+                                        <div class="avatar-option selected">
+                                            <i class="fas fa-user-circle"></i>
+                                        </div>
+                                        <div class="avatar-option">
+                                            <i class="fas fa-user-astronaut"></i>
+                                        </div>
+                                        <div class="avatar-option">
+                                            <i class="fas fa-user-ninja"></i>
+                                        </div>
+                                        <div class="avatar-option">
+                                            <i class="fas fa-user-secret"></i>
+                                        </div>
+                                        <div class="avatar-option">
+                                            <i class="fas fa-user-tie"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Settings Tab -->
+                        <div class="dashboard-tab" id="tab-settings">
+                            <h3><i class="fas fa-sliders-h"></i> Preferences</h3>
+                            <div class="settings-card">
+                                <div class="settings-section">
+                                    <h4>Chat Settings</h4>
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <span>Notification Sound</span>
+                                            <p>Play a sound when you receive a message</p>
+                                        </div>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="notification-sound" checked>
+                                            <label for="notification-sound"></label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <span>Auto Scroll</span>
+                                            <p>Automatically scroll to new messages</p>
+                                        </div>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="auto-scroll" checked>
+                                            <label for="auto-scroll"></label>
+                                        </div>
+                                    </div>
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <span>Font Size</span>
+                                            <p>Adjust text size for the chat</p>
+                                        </div>
+                                        <div class="setting-control">
+                                            <select id="font-size">
+                                                <option value="small">Small</option>
+                                                <option value="medium" selected>Medium</option>
+                                                <option value="large">Large</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-section">
+                                    <h4>Privacy Settings</h4>
+                                    <div class="setting-item">
+                                        <div class="setting-info">
+                                            <span>Block Images</span>
+                                            <p>Don't show images in chat (coming soon)</p>
+                                        </div>
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="block-images">
+                                            <label for="block-images"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stats Tab -->
+                        <div class="dashboard-tab" id="tab-stats">
+                            <h3><i class="fas fa-chart-bar"></i> Your Activity</h3>
+                            <div class="stats-card">
+                                <div class="stats-row">
+                                    <div class="stat-box">
+                                        <div class="stat-icon"><i class="fas fa-comment"></i></div>
+                                        <div class="stat-value" id="total-chats">0</div>
+                                        <div class="stat-label">Total Chats</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-icon"><i class="fas fa-paper-plane"></i></div>
+                                        <div class="stat-value" id="messages-sent">0</div>
+                                        <div class="stat-label">Messages Sent</div>
+                                    </div>
+                                </div>
+                                <div class="stats-row">
+                                    <div class="stat-box">
+                                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                                        <div class="stat-value" id="time-spent">0m</div>
+                                        <div class="stat-label">Time Spent</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                                        <div class="stat-value" id="people-met">0</div>
+                                        <div class="stat-label">People Met</div>
+                                    </div>
+                                </div>
+                                <div class="stats-chart">
+                                    <h4>Activity Over Time</h4>
+                                    <div class="chart-placeholder">
+                                        <i class="fas fa-chart-line"></i>
+                                        <p>Your chat activity will appear here</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Themes Tab -->
+                        <div class="dashboard-tab" id="tab-themes">
+                            <h3><i class="fas fa-palette"></i> Personalize</h3>
+                            <div class="themes-card">
+                                <div class="theme-section">
+                                    <h4>Color Themes</h4>
+                                    <div class="theme-grid">
+                                        <div class="theme-option selected" data-theme="default">
+                                            <div class="theme-preview default-theme"></div>
+                                            <span>Default</span>
+                                        </div>
+                                        <div class="theme-option" data-theme="midnight">
+                                            <div class="theme-preview midnight-theme"></div>
+                                            <span>Midnight</span>
+                                        </div>
+                                        <div class="theme-option" data-theme="sunset">
+                                            <div class="theme-preview sunset-theme"></div>
+                                            <span>Sunset</span>
+                                        </div>
+                                        <div class="theme-option" data-theme="forest">
+                                            <div class="theme-preview forest-theme"></div>
+                                            <span>Forest</span>
+                                        </div>
+                                        <div class="theme-option" data-theme="ocean">
+                                            <div class="theme-preview ocean-theme"></div>
+                                            <span>Ocean</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chat-background-section">
+                                    <h4>Chat Background</h4>
+                                    <div class="background-grid">
+                                        <div class="bg-option selected" data-bg="default">
+                                            <div class="bg-preview bg-default"></div>
+                                            <span>Default</span>
+                                        </div>
+                                        <div class="bg-option" data-bg="gradient">
+                                            <div class="bg-preview bg-gradient"></div>
+                                            <span>Gradient</span>
+                                        </div>
+                                        <div class="bg-option" data-bg="dots">
+                                            <div class="bg-preview bg-dots"></div>
+                                            <span>Dots</span>
+                                        </div>
+                                        <div class="bg-option" data-bg="waves">
+                                            <div class="bg-preview bg-waves"></div>
+                                            <span>Waves</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+            <p>WhiBO © 2025 | <a href="privacy.html" class="text-primary-600 dark:text-primary-400 hover:underline">Privacy</a> | <a href="terms.html" class="text-primary-600 dark:text-primary-400 hover:underline">Terms</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-switch');
+        
+        // Check for saved theme preference or use device preference
+        if (localStorage.getItem('color-theme') === 'dark' || 
+            (!localStorage.getItem('color-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            themeToggle.checked = true;
+        }
+        
+        // Listen for toggle changes
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            }
+        });
+    </script>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+
+    <!-- Add this right before the end of body tag -->
+    <div class="matching-animation-container">
+        <div class="matching-animation">
+            <div class="matching-circles">
+                <div class="matching-circle user-circle">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="matching-circle stranger-circle">
+                    <i class="fas fa-user-secret"></i>
+                </div>
+            </div>
+            <div class="matching-text">Connecting you with a stranger...</div>
+        </div>
+        <div class="connected-text">Connected!</div>
+        <div class="connected-pulse"></div>
+    </div>
+</body>
+</html>

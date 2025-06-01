@@ -292,6 +292,22 @@ io.on('connection', (socket) => {
         console.log(`User disconnected: ${socket.id}`);
     });
     
+    // Handle nickname exchange
+socket.on('request nickname', () => {
+    const nickname = `User-${crypto.randomBytes(2).toString('hex')}`;
+    socket.emit('stranger nickname', nickname);
+});
+
+socket.on('set nickname', (nickname) => {
+    const partnerId = chatPairs.get(socket.id);
+    if (partnerId) {
+        const partnerSocket = io.sockets.sockets.get(partnerId);
+        if (partnerSocket) {
+            partnerSocket.emit('stranger nickname', nickname);
+        }
+    }
+});
+    
     // Helper function to handle disconnection and end chat
     function handleDisconnect(userId) {
         // Remove from waiting queue

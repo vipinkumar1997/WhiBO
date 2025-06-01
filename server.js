@@ -220,16 +220,20 @@ io.on('connection', (socket) => {
             
             // Update admin clients
             emitAdminUpdates();
-        }
-    });
+        }    });
     
     // User sends a message
-    socket.on('chat message', (message) => {
+    socket.on('chat message', (message, callback) => {
         const partnerId = chatPairs.get(socket.id);
         if (partnerId) {
+            console.log(`Sending message from ${socket.id} to ${partnerId}`);
             const partnerSocket = io.sockets.sockets.get(partnerId);
             if (partnerSocket) {
                 partnerSocket.emit('chat message', message);
+                // Acknowledge message delivery
+                if (typeof callback === 'function') {
+                    callback(true);
+                }
                 
                 // Update stats
                 stats.messagesToday++;

@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // New state variables
     let isSidebarVisible = window.innerWidth > 768; // Default visible on desktop
     let isEmojiPickerVisible = false;
+    let strangerNickname = null; // Store the stranger's nickname for this chat
 
     // New UI state variables
     let animationsEnabled = true;
@@ -602,20 +603,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const messageContent = document.createElement('div');
         messageContent.className = 'message-content';
         
-        // Create message bubble with animation
+        // Create nickname element with data attribute for future updates
+        const nicknameElement = document.createElement('div');
+        nicknameElement.className = 'message-nickname';
+        if (isOutgoing) {
+            nicknameElement.textContent = userNickname;
+        } else {
+            nicknameElement.textContent = strangerNickname || 'Stranger';
+            nicknameElement.dataset.isStranger = 'true';
+        }
+        
+        // Create message bubble
         const messageBubble = document.createElement('div');
         messageBubble.className = 'message-bubble';
         messageBubble.textContent = content;
-        messageBubble.style.animation = isOutgoing ? 'slideInRight 0.3s ease' : 'slideInLeft 0.3s ease';
-          // Create nickname element
-        const nicknameElement = document.createElement('div');
-        nicknameElement.className = 'message-nickname';
-        nicknameElement.textContent = isOutgoing ? userNickname : 'Stranger';
         
         // Assemble message components
         messageContent.appendChild(nicknameElement);
         messageContent.appendChild(messageBubble);
-        
         messageElement.appendChild(avatarElement);
         messageElement.appendChild(messageContent);
         
@@ -623,19 +628,19 @@ document.addEventListener('DOMContentLoaded', () => {
         messageElement.style.opacity = '0';
         chatMessages.appendChild(messageElement);
         
-        // Force a reflow to trigger animation
+        // Force a reflow and animate
         void messageElement.offsetWidth;
         messageElement.style.opacity = '1';
         
         // Scroll to bottom
         scrollChatToBottom();
         
-        // Provide haptic feedback on mobile devices
+        // Haptic feedback for mobile
         if (window.navigator && window.navigator.vibrate) {
             window.navigator.vibrate(50);
         }
         
-        // Play sound for incoming messages
+        // Sound for incoming messages
         if (!isOutgoing && userSettings.notificationSound) {
             playNotificationSound();
         }
@@ -1044,6 +1049,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Update stranger's nickname in all messages
+    function updateStrangerNickname(nickname) {
+        if (!chatMessages) return;
+        const strangerNicknameElements = chatMessages.querySelectorAll('.message.stranger .message-nickname[data-is-stranger="true"]');
+        strangerNicknameElements.forEach(element => {
+            element.textContent = nickname;
+        });
+    }
+
     // Socket events with enhanced logging
     socket.on('matched', () => {
         console.log('✅ Matched with stranger!');
@@ -1078,7 +1092,17 @@ document.addEventListener('DOMContentLoaded', () => {
             lastMessageDate = null;
             addSystemMessage('You are now connected with a stranger');
             
-            if (socket) socket.emit('set nickname', userNickname);
+            // When matched, generate and exchange nicknames
+            isSearching = false;
+            chatActive = true;
+            strangerNickname = null;
+            // Generate a new random nickname for this session
+            userNickname = generateRandomNickname();
+            localStorage.setItem('whibo-nickname', userNickname);
+            socket.emit('set nickname', userNickname);
+            
+            // Request stranger's nickname
+            socket.emit('request nickname');
             
             setTimeout(() => {
                 if (messageInput) messageInput.focus();
@@ -1091,12 +1115,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 300);
         });
     });
-      // Handle incoming messages with enhanced UI
+    
+    // Listen for the stranger's nickname
+    socket.on('stranger nickname', (nickname) => {
+        strangerNickname = nickname;
+        updateStrangerNickname(nickname);
+    });
+
+    // Send our nickname to the partner when requested
+    socket.on('request nickname', () => {
+        socket.emit('set nickname', userNickname);
+    });
+    
+    // Handle incoming messages with enhanced UI
     socket.on('chat message', (message) => {
         console.log('📩 Received message:', message);
         
         // Add message to chat UI
         addMessage(message, false);
+        
+        // Scroll chat to bottom
+        scrollChatToBottom();
         
         // Play notification sound if enabled
         if (userSettings.notificationSound) {

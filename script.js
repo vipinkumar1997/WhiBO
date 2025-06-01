@@ -321,10 +321,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     chatScreen.classList.remove('animated-entry');
                 }, 500);
-                
-                // Set focus to input after transition
+                  // Set focus to input and clear any previous messages
                 setTimeout(() => {
-                    if (messageInput) messageInput.focus();
+                    if (messageInput) {
+                        messageInput.focus();
+                        if (chatMessages) {
+                            chatMessages.innerHTML = '';
+                            lastMessageDate = null;
+                        }
+                    }
                 }, 300);
             }
         }
@@ -573,18 +578,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Scroll to bottom
         scrollChatToBottom();
-    }
-
-    // Add a new message to the chat
+    }    // Add a new message to the chat
     function addMessage(content, isOutgoing = false) {
-        if (!chatMessages) return;
+        if (!chatMessages || !content) return;
         
         // Check if we need to add date separator
         addDateSeparatorIfNeeded();
         
         // Create message container
         const messageElement = document.createElement('div');
-        messageElement.className = isOutgoing ? 'message outgoing' : 'message incoming';
+        messageElement.className = `message ${isOutgoing ? 'self' : 'stranger'}`;
+        messageElement.setAttribute('data-time', formatTime(new Date()));
         
         // Create avatar element
         const avatarElement = document.createElement('div');
@@ -598,32 +602,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const messageContent = document.createElement('div');
         messageContent.className = 'message-content';
         
-        // Create message bubble
+        // Create message bubble with animation
         const messageBubble = document.createElement('div');
         messageBubble.className = 'message-bubble';
         messageBubble.textContent = content;
-        
-        // Create message time
-        const messageTime = document.createElement('div');
-        messageTime.className = 'message-time';
-        messageTime.textContent = formatTime(new Date());
+        messageBubble.style.animation = isOutgoing ? 'slideInRight 0.3s ease' : 'slideInLeft 0.3s ease';
+          // Create nickname element
+        const nicknameElement = document.createElement('div');
+        nicknameElement.className = 'message-nickname';
+        nicknameElement.textContent = isOutgoing ? userNickname : 'Stranger';
         
         // Assemble message components
+        messageContent.appendChild(nicknameElement);
         messageContent.appendChild(messageBubble);
-        messageContent.appendChild(messageTime);
         
         messageElement.appendChild(avatarElement);
         messageElement.appendChild(messageContent);
         
-        // Add to chat
+        // Add to chat with animation
+        messageElement.style.opacity = '0';
         chatMessages.appendChild(messageElement);
         
-        // Scroll to bottom if auto-scroll is enabled
-        if (userSettings.autoScroll) {
-            scrollChatToBottom();
+        // Force a reflow to trigger animation
+        void messageElement.offsetWidth;
+        messageElement.style.opacity = '1';
+        
+        // Scroll to bottom
+        scrollChatToBottom();
+        
+        // Provide haptic feedback on mobile devices
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(50);
         }
         
-        // Play notification sound for incoming messages
+        // Play sound for incoming messages
         if (!isOutgoing && userSettings.notificationSound) {
             playNotificationSound();
         }
@@ -825,9 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Add visual feedback for topic suggestion
         addRippleEffect(newTopicBtn);
-    }
-
-    // Send message function
+    }    // Send message function
     function sendMessage() {
         if (!messageInput || !chatActive) return;
         
@@ -836,9 +846,19 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Add message to chat
         addMessage(message, true);
-        
-        // Emit message to server
-        socket.emit('message', { content: message });
+          // Emit message to server with correct event name and callback
+        socket.emit('chat message', message, (delivered) => {
+            if (delivered) {
+                // Add a subtle checkmark to the message
+                const lastMessage = chatMessages.lastElementChild;
+                if (lastMessage) {
+                    const check = document.createElement('span');
+                    check.className = 'message-status';
+                    check.innerHTML = '<i class="fas fa-check"></i>';
+                    lastMessage.querySelector('.message-content').appendChild(check);
+                }
+            }
+        });
         
         // Clear input
         messageInput.value = '';
@@ -1071,13 +1091,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 300);
         });
     });
-    
-    // Handle incoming messages with enhanced UI
-    socket.on('message', (data) => {
-        console.log('📩 Received message:', data);
+      // Handle incoming messages with enhanced UI
+    socket.on('chat message', (message) => {
+        console.log('📩 Received message:', message);
         
         // Add message to chat UI
-        addMessage(data.content, false);
+        addMessage(message, false);
+        
+        // Play notification sound if enabled
+        if (userSettings.notificationSound) {
+            playNotificationSound();
+        }
     });
     
     // Handle typing indicator
